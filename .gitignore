@@ -1,7 +1,10 @@
-.ignore
 .infra
 .terraform
 .terraform-plan*
 .terraform.lock.hcl
 .terraform.tfstate.lock.info
 terraform.tfsta*
+
+.ignore
+*.bitnami
+.deep-dive
