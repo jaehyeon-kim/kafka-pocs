@@ -39,7 +39,7 @@ class Order:
 
 
 class Producer:
-    def __init__(self, bootstrap_servers: str, topic: str):
+    def __init__(self, bootstrap_servers: list, topic: str):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
         self.producer = self.create()
@@ -67,7 +67,7 @@ class Producer:
 if __name__ == "__main__":
     fake = Faker()
     # Faker.seed(1237)
-    producer = Producer(bootstrap_servers="localhost:9093", topic="orders")
+    producer = Producer(bootstrap_servers=["localhost:9093"], topic="orders")
 
     while True:
         orders = Order(fake).create(10)
