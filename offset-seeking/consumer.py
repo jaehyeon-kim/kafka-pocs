@@ -39,14 +39,14 @@ class Consumer:
                 msg = self.consumer.poll(timeout_ms=1000, max_records=1)
                 if msg is None:
                     continue
-                self.show_meta(msg)
+                self.print_info(msg)
                 time.sleep(5)
         except KafkaError as error:
             logging.error(error)
         finally:
             self.consumer.close()
 
-    def show_meta(self, msg: dict):
+    def print_info(self, msg: dict):
         for _, v in msg.items():
             for r in v:
                 ts = r.timestamp
