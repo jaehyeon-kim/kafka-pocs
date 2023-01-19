@@ -3,6 +3,10 @@
 *.bitnami
 .deep-dive
 
+## sam
+.aws-sam*
+builds
+
 ## terraform
 .infra
 .terraform
