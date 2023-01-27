@@ -1,5 +1,8 @@
 import json
+import time
 
 
 def lambda_function(event, context):
-    return json.dumps({"message": "Hello from Lambda!"})
+    for i in range(10):
+        print(f"current run - {i}")
+        time.sleep(1)
