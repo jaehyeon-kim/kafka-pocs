@@ -26,19 +26,24 @@ locals {
     azs  = slice(data.aws_availability_zones.available.names, 0, 3)
   }
 
+  default_bucket = {
+    name = "${local.name}-${data.aws_caller_identity.current.account_id}-${local.region}"
+  }
+
   vpn = {
-    to_create      = var.vpn_to_create
-    to_use_spot    = var.vpn_to_use_spot
-    admin_username = "master"
-    ingress_cidr   = var.vpn_to_limit_vpn_ingress ? "${chomp(data.http.local_ip_address.response_body)}/32" : "0.0.0.0/0"
+    to_create    = var.vpn_to_create
+    to_use_spot  = var.vpn_to_use_spot
+    ingress_cidr = var.vpn_to_limit_vpn_ingress ? "${chomp(data.http.local_ip_address.response_body)}/32" : "0.0.0.0/0"
     spot_override = [
       { instance_type : "t3.nano" },
       { instance_type : "t3a.nano" },
     ]
   }
 
-  default_bucket = {
-    name = "${local.name}-${data.aws_caller_identity.current.account_id}-${local.region}"
+  redshift = {
+    base_capacity  = 128
+    admin_username = "master"
+    db_name        = "main"
   }
 
   producer = {

@@ -57,6 +57,32 @@ output "vpn_autoscaling_group_name" {
   }
 }
 
+# # redshift resources
+# output "redshift_ns_name" {
+#   description = "Redshift serverless namespace name"
+#   value       = aws_redshiftserverless_namespace.namespace.id
+# }
+
+# output "redshift_ns_id" {
+#   description = "Redshift serverless namespace id"
+#   value       = aws_redshiftserverless_namespace.namespace.namespace_id
+# }
+
+# output "redshift_wg_name" {
+#   description = "Redshift serverless workgroup name"
+#   value       = aws_redshiftserverless_workgroup.workgroup.id
+# }
+
+# output "redshift_wg_id" {
+#   description = "Redshift serverless workgroup name"
+#   value       = aws_redshiftserverless_workgroup.workgroup.workgroup_id
+# }
+
+# output "redshift_wg_endpoint" {
+#   description = "Endpoint that is created from the workgroup"
+#   value       = aws_redshiftserverless_workgroup.workgroup.endpoint
+# }
+
 # # kafka producer outputs
 # output "kafka_producer_function_name" {
 #   description = "The ARN of the Lambda Function"

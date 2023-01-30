@@ -2,6 +2,7 @@
 .ignore
 *.bitnami
 .deep-dive
+key-pair
 
 ## sam
 .aws-sam*
