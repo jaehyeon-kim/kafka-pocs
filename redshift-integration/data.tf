@@ -37,11 +37,11 @@ data "aws_secretsmanager_secret_version" "vpn_secrets" {
   secret_id = data.aws_secretsmanager_secret.vpn_secrets[0].id
 }
 
-# ## data sources for kafka producer
-# data "aws_lambda_function" "kafka_producer_lambda" {
-#   function_name = local.producer.function_name
+## data sources for redshift integration
+data "aws_lambda_function" "kafka_producer_lambda" {
+  function_name = local.producer.function_name
 
-#   depends_on = [
-#     module.kafka_producer_lambda
-#   ]
-# }
+  depends_on = [
+    module.kafka_producer_lambda
+  ]
+}

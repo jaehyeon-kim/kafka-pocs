@@ -15,6 +15,8 @@ resource "aws_msk_serverless_cluster" "demo" {
       }
     }
   }
+
+  tags = local.tags
 }
 
 # Security group resources for vpn access

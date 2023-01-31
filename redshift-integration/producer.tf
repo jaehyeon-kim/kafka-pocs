@@ -38,6 +38,10 @@ module "kafka_producer_lambda" {
   attach_network_policy  = true
   attach_policies        = true
   policies               = [aws_iam_policy.kafka_producer_lambda_permission.arn]
+  number_of_policies     = 1
+  environment_variables = {
+    BOOTSTRAP_SERVERS = local.msk_serverless.bootstrap_servers
+  }
 
   tags = local.tags
 }

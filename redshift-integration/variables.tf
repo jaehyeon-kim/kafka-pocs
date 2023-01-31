@@ -40,12 +40,6 @@ locals {
     ]
   }
 
-  redshift = {
-    base_capacity  = 128
-    admin_username = "master"
-    db_name        = "main"
-  }
-
   producer = {
     parent_path   = "${abspath(path.module)}/lambdas"
     function_name = "kafka_producer"
@@ -55,6 +49,16 @@ locals {
     memory_size   = 256
     runtime       = "python3.8"
     schedule_rate = "rate(1 minute)"
+  }
+
+  msk_serverless = {
+    bootstrap_servers = "boot-an6fuj0u.c1.kafka-serverless.ap-southeast-2.amazonaws.com:9098"
+  }
+
+  redshift = {
+    base_capacity  = 128
+    admin_username = "master"
+    db_name        = "main"
   }
 
   tags = {
