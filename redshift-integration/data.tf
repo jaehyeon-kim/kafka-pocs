@@ -13,7 +13,7 @@ data "aws_availability_zones" "available" {
 ## data sources for VPN
 # Local ip address
 data "http" "local_ip_address" {
-  url = "http://ifconfig.co"
+  url = "https://ifconfig.me/ip"
 }
 
 # Latest Amazon linux 2 AMI

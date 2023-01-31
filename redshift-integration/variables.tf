@@ -33,7 +33,7 @@ locals {
   vpn = {
     to_create    = var.vpn_to_create
     to_use_spot  = var.vpn_to_use_spot
-    ingress_cidr = var.vpn_to_limit_vpn_ingress ? "${chomp(data.http.local_ip_address.response_body)}/32" : "0.0.0.0/0"
+    ingress_cidr = var.vpn_to_limit_vpn_ingress ? "${data.http.local_ip_address.response_body}/32" : "0.0.0.0/0"
     spot_override = [
       { instance_type : "t3.nano" },
       { instance_type : "t3a.nano" },
