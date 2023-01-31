@@ -17,7 +17,7 @@
 
 #   base_capacity      = local.redshift.base_capacity
 #   subnet_ids         = module.vpc.private_subnets
-#   security_group_ids = [aws_security_group.vpn_redshift_serverless_access.id]
+#   security_group_ids = [aws_security_group.redshift_serverless.id]
 
 #   tags = local.tags
 # }
@@ -63,25 +63,34 @@
 #   }
 # }
 
-# # Security group resources for vpn access
-# resource "aws_security_group" "vpn_redshift_serverless_access" {
-#   name   = "${local.name}-vpn-redshift-access"
-#   vpc_id = module.vpc.vpc_id
+resource "aws_security_group" "redshift_serverless" {
+  name   = "${local.name}-redshift-serverless"
+  vpc_id = module.vpc.vpc_id
 
-#   lifecycle {
-#     create_before_destroy = true
-#   }
+  lifecycle {
+    create_before_destroy = true
+  }
 
-#   tags = local.tags
-# }
+  tags = local.tags
+}
 
-# resource "aws_security_group_rule" "redshift_vpn_inbound" {
-#   count                    = local.vpn.to_create ? 1 : 0
-#   type                     = "ingress"
-#   description              = "VPN access"
-#   security_group_id        = aws_security_group.vpn_redshift_serverless_access.id
-#   protocol                 = "tcp"
-#   from_port                = 5439
-#   to_port                  = 5439
-#   source_security_group_id = aws_security_group.vpn[0].id
-# }
+resource "aws_security_group_rule" "redshift_vpn_inbound" {
+  count                    = local.vpn.to_create ? 1 : 0
+  type                     = "ingress"
+  description              = "VPN access"
+  security_group_id        = aws_security_group.redshift_serverless.id
+  protocol                 = "tcp"
+  from_port                = 5439
+  to_port                  = 5439
+  source_security_group_id = aws_security_group.vpn[0].id
+}
+
+resource "aws_security_group_rule" "redshift_msk_egress" {
+  type              = "egress"
+  description       = "lambda msk access"
+  security_group_id = aws_security_group.redshift_serverless.id
+  protocol          = "tcp"
+  from_port         = 9098
+  to_port           = 9098
+  cidr_blocks       = ["0.0.0.0/0"]
+}
