@@ -41,18 +41,19 @@ locals {
   }
 
   producer = {
-    parent_path   = "${abspath(path.module)}/lambdas"
-    function_name = "kafka_producer"
-    handler       = "app.lambda_function"
-    concurrency   = 2
-    timeout       = 90
-    memory_size   = 256
-    runtime       = "python3.8"
-    schedule_rate = "rate(1 minute)"
+    parent_path       = "${abspath(path.module)}/lambdas"
+    function_name     = "kafka_producer"
+    handler           = "app.lambda_function"
+    concurrency       = 2
+    timeout           = 90
+    memory_size       = 256
+    runtime           = "python3.8"
+    schedule_rate     = "rate(1 minute)"
+    to_enable_trigger = false
     environment = {
       bootstrap_servers = "boot-66xznali.c1.kafka-serverless.ap-southeast-2.amazonaws.com:9098"
-      topic_name        = "test"
-      max_run_sec       = 60
+      topic_name        = "test2"
+      max_run_sec       = 10
     }
   }
 

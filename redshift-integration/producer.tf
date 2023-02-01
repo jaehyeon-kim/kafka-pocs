@@ -1,28 +1,28 @@
-# module "eventbridge" {
-#   source = "terraform-aws-modules/eventbridge/aws"
+module "eventbridge" {
+  source = "terraform-aws-modules/eventbridge/aws"
 
-#   create_bus = false
+  create_bus = false
 
-#   rules = {
-#     crons = {
-#       description         = "Kafka producer lambda schedule"
-#       schedule_expression = local.producer.schedule_rate
-#     }
-#   }
+  rules = {
+    crons = {
+      description         = "Kafka producer lambda schedule"
+      schedule_expression = local.producer.schedule_rate
+    }
+  }
 
-#   targets = {
-#     crons = [for i in range(local.producer.concurrency) : {
-#       name = "lambda-target-${i}"
-#       arn  = data.aws_lambda_function.kafka_producer_lambda.arn
-#     }]
-#   }
+  targets = {
+    crons = [for i in range(local.producer.concurrency) : {
+      name = "lambda-target-${i}"
+      arn  = data.aws_lambda_function.kafka_producer_lambda.arn
+    }]
+  }
 
-#   depends_on = [
-#     module.kafka_producer_lambda
-#   ]
+  depends_on = [
+    module.kafka_producer_lambda
+  ]
 
-#   tags = local.tags
-# }
+  tags = local.tags
+}
 
 module "kafka_producer_lambda" {
   source = "terraform-aws-modules/lambda/aws"
@@ -53,17 +53,18 @@ resource "aws_lambda_function_event_invoke_config" "kafka_producer_lambda" {
   maximum_retry_attempts = 0
 }
 
-# resource "aws_lambda_permission" "allow_eventbridge" {
-#   statement_id  = "InvokeLambdaFunction"
-#   action        = "lambda:InvokeFunction"
-#   function_name = local.producer.function_name
-#   principal     = "events.amazonaws.com"
-#   source_arn    = module.eventbridge.eventbridge_rule_arns["crons"]
+resource "aws_lambda_permission" "allow_eventbridge" {
+  count         = local.producer.to_enable_trigger ? 1 : 0
+  statement_id  = "InvokeLambdaFunction"
+  action        = "lambda:InvokeFunction"
+  function_name = local.producer.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = module.eventbridge.eventbridge_rule_arns["crons"]
 
-#   depends_on = [
-#     module.eventbridge
-#   ]
-# }
+  depends_on = [
+    module.eventbridge
+  ]
+}
 
 resource "aws_security_group" "kafka_producer_lambda" {
   name   = "${local.name}-lambda-msk-access"
