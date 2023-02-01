@@ -61,3 +61,42 @@ resource "aws_security_group_rule" "msk_redshift_inbound" {
   to_port                  = 9098
   source_security_group_id = aws_security_group.redshift_serverless.id
 }
+
+resource "aws_iam_policy" "msk_access_permission" {
+  name = "${local.name}-lambda-kafka-permissions"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid = "PermissionOnCluster"
+        Action = [
+          "kafka-cluster:Connect",
+          "kafka-cluster:AlterCluster",
+          "kafka-cluster:DescribeCluster"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:cluster/${local.name}-demo-cluster/*"
+      },
+      {
+        Sid = "PermissionOnTopics"
+        Action = [
+          "kafka-cluster:*Topic*",
+          "kafka-cluster:WriteData",
+          "kafka-cluster:ReadData"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:topic/${local.name}-demo-cluster/*"
+      },
+      {
+        Sid = "PermissionOnGroups"
+        Action = [
+          "kafka-cluster:AlterGroup",
+          "kafka-cluster:DescribeGroup"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:group/${local.name}-demo-cluster/*"
+      }
+    ]
+  })
+}

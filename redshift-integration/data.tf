@@ -38,6 +38,14 @@ data "aws_secretsmanager_secret_version" "vpn_secrets" {
 }
 
 ## data sources for redshift integration
+data "aws_secretsmanager_secret" "redshift_secrets" {
+  name = aws_secretsmanager_secret.redshift_secrets.name
+}
+
+data "aws_secretsmanager_secret_version" "redshift_secrets" {
+  secret_id = data.aws_secretsmanager_secret.redshift_secrets.id
+}
+
 data "aws_lambda_function" "kafka_producer_lambda" {
   function_name = local.producer.function_name
 
