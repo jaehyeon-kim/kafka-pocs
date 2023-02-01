@@ -62,8 +62,8 @@ resource "aws_security_group_rule" "msk_redshift_inbound" {
   source_security_group_id = aws_security_group.redshift_serverless.id
 }
 
-resource "aws_iam_policy" "msk_access_permission" {
-  name = "${local.name}-lambda-kafka-permissions"
+resource "aws_iam_policy" "msk_permission" {
+  name = "${local.name}-msk-permission"
 
   policy = jsonencode({
     Version = "2012-10-17"

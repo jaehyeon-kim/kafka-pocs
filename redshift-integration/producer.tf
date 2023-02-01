@@ -37,7 +37,7 @@ module "kafka_producer_lambda" {
   vpc_security_group_ids = [aws_security_group.kafka_producer_lambda.id]
   attach_network_policy  = true
   attach_policies        = true
-  policies               = [aws_iam_policy.msk_access_permission.arn]
+  policies               = [aws_iam_policy.msk_permission.arn]
   number_of_policies     = 1
   environment_variables = {
     BOOTSTRAP_SERVERS = local.producer.environment.bootstrap_servers

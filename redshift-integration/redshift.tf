@@ -39,7 +39,7 @@ resource "aws_iam_role" "redshift_serverless_role" {
     "arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess",
     "arn:aws:iam::aws:policy/AmazonRedshiftFullAccess",
     "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess",
-    aws_iam_policy.msk_access_permission.arn
+    aws_iam_policy.msk_permission.arn
   ]
 }
 
