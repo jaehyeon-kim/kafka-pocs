@@ -56,47 +56,18 @@ resource "aws_security_group_rule" "msk_redshift_inbound" {
   type                     = "ingress"
   description              = "redshift access"
   security_group_id        = aws_security_group.msk_serverless.id
-  protocol                 = "tcp"
-  from_port                = 9098
-  to_port                  = 9098
+  protocol                 = "-1"
+  from_port                = "0"
+  to_port                  = "0"
   source_security_group_id = aws_security_group.redshift_serverless.id
 }
 
-resource "aws_iam_policy" "msk_permission" {
-  name = "${local.name}-msk-permission"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid = "PermissionOnCluster"
-        Action = [
-          "kafka-cluster:Connect",
-          "kafka-cluster:AlterCluster",
-          "kafka-cluster:DescribeCluster"
-        ]
-        Effect   = "Allow"
-        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:cluster/${local.name}-demo-cluster/*"
-      },
-      {
-        Sid = "PermissionOnTopics"
-        Action = [
-          "kafka-cluster:*Topic*",
-          "kafka-cluster:WriteData",
-          "kafka-cluster:ReadData"
-        ]
-        Effect   = "Allow"
-        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:topic/${local.name}-demo-cluster/*"
-      },
-      {
-        Sid = "PermissionOnGroups"
-        Action = [
-          "kafka-cluster:AlterGroup",
-          "kafka-cluster:DescribeGroup"
-        ]
-        Effect   = "Allow"
-        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:group/${local.name}-demo-cluster/*"
-      }
-    ]
-  })
+resource "aws_security_group_rule" "msk_serverless_egress_all" {
+  type              = "egress"
+  description       = "outbound all"
+  security_group_id = aws_security_group.msk_serverless.id
+  protocol          = "-1"
+  from_port         = "0"
+  to_port           = "0"
+  cidr_blocks       = ["0.0.0.0/0"]
 }

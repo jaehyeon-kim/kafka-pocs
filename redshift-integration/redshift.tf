@@ -39,7 +39,7 @@ resource "aws_iam_role" "redshift_serverless_role" {
     "arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess",
     "arn:aws:iam::aws:policy/AmazonRedshiftFullAccess",
     "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess",
-    aws_iam_policy.msk_permission.arn
+    aws_iam_policy.msk_redshift_permission.arn
   ]
 }
 
@@ -94,6 +94,37 @@ resource "aws_security_group_rule" "redshift_msk_egress" {
   from_port         = 9098
   to_port           = 9098
   cidr_blocks       = ["0.0.0.0/0"]
+}
+
+resource "aws_iam_policy" "msk_redshift_permission" {
+  name = "${local.name}-msk-redshift-permission"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid = "PermissionOnCluster"
+        Action = [
+          "kafka-cluster:ReadData",
+          "kafka-cluster:DescribeTopic",
+          "kafka-cluster:Connect",
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:kafka:*:${data.aws_caller_identity.current.account_id}:cluster/*/*",
+          "arn:aws:kafka:*:${data.aws_caller_identity.current.account_id}:topic/*/*"
+        ]
+      },
+      {
+        Sid = "PermissionOnGroups"
+        Action = [
+          "kafka:GetBootstrapBrokers"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      }
+    ]
+  })
 }
 
 resource "random_password" "redshift_admin_pw" {

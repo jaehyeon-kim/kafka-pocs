@@ -37,7 +37,7 @@ module "kafka_producer_lambda" {
   vpc_security_group_ids = [aws_security_group.kafka_producer_lambda.id]
   attach_network_policy  = true
   attach_policies        = true
-  policies               = [aws_iam_policy.msk_permission.arn]
+  policies               = [aws_iam_policy.msk_lambda_permission.arn]
   number_of_policies     = 1
   environment_variables = {
     BOOTSTRAP_SERVERS = local.producer.environment.bootstrap_servers
@@ -85,4 +85,43 @@ resource "aws_security_group_rule" "kafka_producer_lambda_msk_egress" {
   from_port         = 9098
   to_port           = 9098
   cidr_blocks       = ["0.0.0.0/0"]
+}
+
+resource "aws_iam_policy" "msk_lambda_permission" {
+  name = "${local.name}-msk-lambda-permission"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid = "PermissionOnCluster"
+        Action = [
+          "kafka-cluster:Connect",
+          "kafka-cluster:AlterCluster",
+          "kafka-cluster:DescribeCluster"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:cluster/${local.name}-demo-cluster/*"
+      },
+      {
+        Sid = "PermissionOnTopics"
+        Action = [
+          "kafka-cluster:*Topic*",
+          "kafka-cluster:WriteData",
+          "kafka-cluster:ReadData"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:topic/${local.name}-demo-cluster/*"
+      },
+      {
+        Sid = "PermissionOnGroups"
+        Action = [
+          "kafka-cluster:AlterGroup",
+          "kafka-cluster:DescribeGroup"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:group/${local.name}-demo-cluster/*"
+      }
+    ]
+  })
 }
