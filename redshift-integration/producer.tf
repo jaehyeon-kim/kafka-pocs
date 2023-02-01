@@ -40,7 +40,9 @@ module "kafka_producer_lambda" {
   policies               = [aws_iam_policy.kafka_producer_lambda_permission.arn]
   number_of_policies     = 1
   environment_variables = {
-    BOOTSTRAP_SERVERS = local.msk_serverless.bootstrap_servers
+    BOOTSTRAP_SERVERS = local.producer.environment.bootstrap_servers
+    TOPIC_NAME        = local.producer.environment.topic_name
+    MAX_RUN_SEC       = local.producer.environment.max_run_sec
   }
 
   tags = local.tags

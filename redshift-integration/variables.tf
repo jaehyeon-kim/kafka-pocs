@@ -49,10 +49,11 @@ locals {
     memory_size   = 256
     runtime       = "python3.8"
     schedule_rate = "rate(1 minute)"
-  }
-
-  msk_serverless = {
-    bootstrap_servers = "boot-an6fuj0u.c1.kafka-serverless.ap-southeast-2.amazonaws.com:9098"
+    environment = {
+      bootstrap_servers = "boot-66xznali.c1.kafka-serverless.ap-southeast-2.amazonaws.com:9098"
+      topic_name        = "test"
+      max_run_sec       = 60
+    }
   }
 
   redshift = {
