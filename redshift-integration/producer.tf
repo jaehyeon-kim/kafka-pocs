@@ -105,7 +105,7 @@ resource "aws_iam_policy" "msk_lambda_permission" {
           "kafka-cluster:DescribeCluster"
         ]
         Effect   = "Allow"
-        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:cluster/${local.name}-demo-cluster/*"
+        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:cluster/${local.name}-msk-cluster/*"
       },
       {
         Sid = "PermissionOnTopics"
@@ -115,7 +115,7 @@ resource "aws_iam_policy" "msk_lambda_permission" {
           "kafka-cluster:ReadData"
         ]
         Effect   = "Allow"
-        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:topic/${local.name}-demo-cluster/*"
+        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:topic/${local.name}-msk-cluster/*"
       },
       {
         Sid = "PermissionOnGroups"
@@ -124,7 +124,7 @@ resource "aws_iam_policy" "msk_lambda_permission" {
           "kafka-cluster:DescribeGroup"
         ]
         Effect   = "Allow"
-        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:group/${local.name}-demo-cluster/*"
+        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:group/${local.name}-msk-cluster/*"
       }
     ]
   })

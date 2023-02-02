@@ -8,10 +8,15 @@ resource "aws_msk_cluster" "msk_data_cluster" {
   }
 
   broker_node_group_info {
-    client_subnets  = module.vpc.private_subnets
-    ebs_volume_size = local.msk.ebs_volume_size
     instance_type   = local.msk.instance_size
+    client_subnets  = module.vpc.private_subnets
     security_groups = [aws_security_group.msk.id]
+    storage_info {
+      ebs_storage_info {
+        volume_size = local.msk.ebs_volume_size
+      }
+    }
+
   }
 
   client_authentication {
