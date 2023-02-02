@@ -1,5 +1,0 @@
--r lambdas/kafka_producer/requirements.txt
-black
-pytest
-pytest-cov
-boto3
