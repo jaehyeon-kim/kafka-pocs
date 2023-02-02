@@ -1,4 +1,4 @@
-# VPC releated outputs
+# VPC releated
 output "vpc_id" {
   description = "The ID of the VPC"
   value       = module.vpc.vpc_id
@@ -35,7 +35,7 @@ output "default_bucket_name" {
   value       = aws_s3_bucket.default_bucket.id
 }
 
-# VPN related outputs
+# VPN related
 output "vpn_launch_template_arn" {
   description = "The ARN of the VPN launch template"
   value = {
@@ -57,34 +57,45 @@ output "vpn_autoscaling_group_name" {
   }
 }
 
-# # redshift resources
-# output "redshift_ns_name" {
-#   description = "Redshift serverless namespace name"
-#   value       = aws_redshiftserverless_namespace.namespace.id
-# }
+# MSK related
+output "msk_arn" {
+  description = "Amazon Resource Name (ARN) of the MSK cluster"
+  value       = aws_msk_cluster.msk_data_cluster.arn
+}
 
-# output "redshift_ns_id" {
-#   description = "Redshift serverless namespace id"
-#   value       = aws_redshiftserverless_namespace.namespace.namespace_id
-# }
+output "msk_bootstrap_brokers_sasl_iam" {
+  description = "One or more DNS names (or IP addresses) and SASL IAM port pairs"
+  value       = aws_msk_cluster.msk_data_cluster.bootstrap_brokers_sasl_iam
+}
 
-# output "redshift_wg_name" {
-#   description = "Redshift serverless workgroup name"
-#   value       = aws_redshiftserverless_workgroup.workgroup.id
-# }
+# redshift resources
+output "redshift_ns_name" {
+  description = "Redshift serverless namespace name"
+  value       = aws_redshiftserverless_namespace.namespace.id
+}
 
-# output "redshift_wg_id" {
-#   description = "Redshift serverless workgroup name"
-#   value       = aws_redshiftserverless_workgroup.workgroup.workgroup_id
-# }
+output "redshift_ns_id" {
+  description = "Redshift serverless namespace id"
+  value       = aws_redshiftserverless_namespace.namespace.namespace_id
+}
 
-# output "redshift_wg_endpoint" {
-#   description = "Endpoint that is created from the workgroup"
-#   value       = aws_redshiftserverless_workgroup.workgroup.endpoint
-# }
+output "redshift_wg_name" {
+  description = "Redshift serverless workgroup name"
+  value       = aws_redshiftserverless_workgroup.workgroup.id
+}
 
-# # kafka producer outputs
-# output "kafka_producer_function_name" {
-#   description = "The ARN of the Lambda Function"
-#   value       = module.kafka_producer_lambda.lambda_function_name
-# }
+output "redshift_wg_id" {
+  description = "Redshift serverless workgroup name"
+  value       = aws_redshiftserverless_workgroup.workgroup.workgroup_id
+}
+
+output "redshift_wg_endpoint" {
+  description = "Endpoint that is created from the workgroup"
+  value       = aws_redshiftserverless_workgroup.workgroup.endpoint
+}
+
+# kafka producer outputs
+output "kafka_producer_function_name" {
+  description = "The ARN of the Lambda Function"
+  value       = module.kafka_producer_lambda.lambda_function_name
+}

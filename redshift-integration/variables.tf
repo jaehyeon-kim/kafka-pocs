@@ -51,10 +51,16 @@ locals {
     schedule_rate     = "rate(1 minute)"
     to_enable_trigger = false
     environment = {
-      bootstrap_servers = "boot-66xznali.c1.kafka-serverless.ap-southeast-2.amazonaws.com:9098"
-      topic_name        = "test2"
-      max_run_sec       = 10
+      topic_name  = "test"
+      max_run_sec = 10
     }
+  }
+
+  msk = {
+    version          = "3.3.1"
+    instance_size    = "kafka.m5.large"
+    ebs_volume_size  = 20
+    log_retention_ms = 604800000 # 7 days
   }
 
   redshift = {

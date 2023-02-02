@@ -40,12 +40,16 @@ module "kafka_producer_lambda" {
   policies               = [aws_iam_policy.msk_lambda_permission.arn]
   number_of_policies     = 1
   environment_variables = {
-    BOOTSTRAP_SERVERS = local.producer.environment.bootstrap_servers
+    BOOTSTRAP_SERVERS = aws_msk_cluster.msk_data_cluster.bootstrap_brokers_sasl_iam
     TOPIC_NAME        = local.producer.environment.topic_name
     MAX_RUN_SEC       = local.producer.environment.max_run_sec
   }
 
   tags = local.tags
+
+  depends_on = [
+    aws_msk_cluster.msk_data_cluster
+  ]
 }
 
 resource "aws_lambda_function_event_invoke_config" "kafka_producer_lambda" {
