@@ -1,0 +1,5 @@
+-r kafka_producer/src/requirements.txt
+black
+pytest
+pytest-cov
+boto3
