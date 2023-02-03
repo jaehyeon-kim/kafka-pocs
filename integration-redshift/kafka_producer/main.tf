@@ -32,8 +32,8 @@ module "kafka_producer_lambda" {
   runtime                = local.producer.runtime
   timeout                = local.producer.timeout
   memory_size            = local.producer.memory_size
-  source_path            = local.src_path
-  vpc_subnet_ids         = data.aws_subnets.private
+  source_path            = local.producer.src_path
+  vpc_subnet_ids         = data.aws_subnets.private.ids
   vpc_security_group_ids = [data.aws_security_group.kafka_producer_lambda.id]
   attach_network_policy  = true
   attach_policies        = true
@@ -80,7 +80,7 @@ resource "aws_iam_policy" "msk_lambda_permission" {
           "kafka-cluster:DescribeCluster"
         ]
         Effect   = "Allow"
-        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:cluster/${infra_prefix}-msk-cluster/*"
+        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:cluster/${local.infra_prefix}-msk-cluster/*"
       },
       {
         Sid = "PermissionOnTopics"
@@ -90,7 +90,7 @@ resource "aws_iam_policy" "msk_lambda_permission" {
           "kafka-cluster:ReadData"
         ]
         Effect   = "Allow"
-        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:topic/${infra_prefix}-msk-cluster/*"
+        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:topic/${local.infra_prefix}-msk-cluster/*"
       },
       {
         Sid = "PermissionOnGroups"
@@ -99,7 +99,7 @@ resource "aws_iam_policy" "msk_lambda_permission" {
           "kafka-cluster:DescribeGroup"
         ]
         Effect   = "Allow"
-        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:group/${infra_prefix}-msk-cluster/*"
+        Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:group/${local.infra_prefix}-msk-cluster/*"
       }
     ]
   })

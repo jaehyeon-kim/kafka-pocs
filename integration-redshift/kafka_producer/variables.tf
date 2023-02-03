@@ -1,10 +1,11 @@
-# Region in which to deploy the solution
+data "aws_caller_identity" "current" {}
+
 data "aws_region" "current" {}
 
 data "aws_vpc" "selected" {
   filter {
     name   = "tag:Name"
-    values = ["${infra_prefix}-vpc"]
+    values = ["${local.infra_prefix}"]
   }
 }
 
@@ -20,11 +21,11 @@ data "aws_subnets" "private" {
 }
 
 data "aws_msk_cluster" "msk_data_cluster" {
-  cluster_name = "${infra_prefix}-msk-cluster"
+  cluster_name = "${local.infra_prefix}-msk-cluster"
 }
 
 data "aws_security_group" "kafka_producer_lambda" {
-  name = "${infra_prefix}-lambda-msk-access"
+  name = "${local.infra_prefix}-lambda-msk-access"
 }
 
 locals {
@@ -40,13 +41,13 @@ locals {
     handler           = "app.lambda_function"
     concurrency       = 2
     timeout           = 90
-    memory_size       = 256
+    memory_size       = 128
     runtime           = "python3.8"
     schedule_rate     = "rate(1 minute)"
     to_enable_trigger = false
     environment = {
-      topic_name  = "test"
-      max_run_sec = 10
+      topic_name  = "test2"
+      max_run_sec = 3
     }
   }
 
