@@ -67,7 +67,7 @@ resource "aws_lambda_permission" "allow_eventbridge" {
 }
 
 resource "aws_iam_policy" "msk_lambda_permission" {
-  name = "${local.name}-msk-lambda-permission"
+  name = "${local.producer.function_name}-msk-lambda-permission"
 
   policy = jsonencode({
     Version = "2012-10-17"

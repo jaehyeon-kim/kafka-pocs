@@ -64,6 +64,37 @@ data "aws_iam_policy_document" "redshift_serverless_assume_role_policy" {
   }
 }
 
+resource "aws_iam_policy" "msk_redshift_permission" {
+  name = "${local.name}-msk-redshift-permission"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid = "PermissionOnCluster"
+        Action = [
+          "kafka-cluster:ReadData",
+          "kafka-cluster:DescribeTopic",
+          "kafka-cluster:Connect",
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:kafka:*:${data.aws_caller_identity.current.account_id}:cluster/*/*",
+          "arn:aws:kafka:*:${data.aws_caller_identity.current.account_id}:topic/*/*"
+        ]
+      },
+      {
+        Sid = "PermissionOnGroups"
+        Action = [
+          "kafka:GetBootstrapBrokers"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 resource "aws_security_group" "redshift_serverless" {
   name   = "${local.name}-redshift-serverless"
   vpc_id = module.vpc.vpc_id
@@ -94,37 +125,6 @@ resource "aws_security_group_rule" "redshift_msk_egress" {
   from_port         = 9098
   to_port           = 9098
   cidr_blocks       = ["0.0.0.0/0"]
-}
-
-resource "aws_iam_policy" "msk_redshift_permission" {
-  name = "${local.name}-msk-redshift-permission"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid = "PermissionOnCluster"
-        Action = [
-          "kafka-cluster:ReadData",
-          "kafka-cluster:DescribeTopic",
-          "kafka-cluster:Connect",
-        ]
-        Effect = "Allow"
-        Resource = [
-          "arn:aws:kafka:*:${data.aws_caller_identity.current.account_id}:cluster/*/*",
-          "arn:aws:kafka:*:${data.aws_caller_identity.current.account_id}:topic/*/*"
-        ]
-      },
-      {
-        Sid = "PermissionOnGroups"
-        Action = [
-          "kafka:GetBootstrapBrokers"
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-      }
-    ]
-  })
 }
 
 resource "random_password" "redshift_admin_pw" {

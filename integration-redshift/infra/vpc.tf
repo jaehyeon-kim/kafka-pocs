@@ -14,5 +14,9 @@ module "vpc" {
   enable_dns_hostnames = true
   single_nat_gateway   = true
 
+  private_subnet_tags = {
+    "Tier" = "Private"
+  }
+
   tags = local.tags
 }

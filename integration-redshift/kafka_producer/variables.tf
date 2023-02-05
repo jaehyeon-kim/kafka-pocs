@@ -29,7 +29,7 @@ data "aws_security_group" "kafka_producer_lambda" {
 }
 
 locals {
-  name        = basename(path.cwd) == "infra" ? basename(dirname(path.cwd)) : basename(path.cwd)
+  name        = local.infra_prefix
   region      = data.aws_region.current.name
   environment = "dev"
 
@@ -39,15 +39,15 @@ locals {
     src_path          = "src"
     function_name     = "kafka_producer"
     handler           = "app.lambda_function"
-    concurrency       = 2
+    concurrency       = 5
     timeout           = 90
     memory_size       = 128
     runtime           = "python3.8"
     schedule_rate     = "rate(1 minute)"
     to_enable_trigger = false
     environment = {
-      topic_name  = "test2"
-      max_run_sec = 3
+      topic_name  = "orders"
+      max_run_sec = 60
     }
   }
 
