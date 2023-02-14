@@ -1,0 +1,2 @@
+faust-streaming>=0.10.4,<2.0
+configloader[all]>=1.0.1,<2.0

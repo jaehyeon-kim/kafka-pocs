@@ -3,6 +3,7 @@
 *.bitnami
 .deep-dive
 *.pem
+*-demo-data
 
 ## sam
 .aws-sam*
