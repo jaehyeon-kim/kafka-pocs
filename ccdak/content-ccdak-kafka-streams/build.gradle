@@ -1,0 +1,42 @@
+plugins {
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.kafka:kafka-streams:3.3.2'
+    implementation 'org.apache.kafka:kafka-clients:3.3.2'
+    testImplementation 'junit:junit:4.12'
+}
+
+application {
+    mainClassName = 'com.linuxacademy.ccdak.streams.StreamsMain'
+}
+
+task(runStreams, dependsOn: 'classes', type: JavaExec) {
+   main = 'com.linuxacademy.ccdak.streams.StreamsMain'
+   classpath = sourceSets.main.runtimeClasspath
+}
+
+task(runAggregations, dependsOn: 'classes', type: JavaExec) {
+   main = 'com.linuxacademy.ccdak.streams.AggregationsMain'
+   classpath = sourceSets.main.runtimeClasspath
+}
+
+task(runJoins, dependsOn: 'classes', type: JavaExec) {
+   main = 'com.linuxacademy.ccdak.streams.JoinsMain'
+   classpath = sourceSets.main.runtimeClasspath
+}
+
+task(runStatelessTransformations, dependsOn: 'classes', type: JavaExec) {
+   main = 'com.linuxacademy.ccdak.streams.StatelessTransformationsMain'
+   classpath = sourceSets.main.runtimeClasspath
+}
+
+task(runWindowing, dependsOn: 'classes', type: JavaExec) {
+   main = 'com.linuxacademy.ccdak.streams.WindowingMain'
+   classpath = sourceSets.main.runtimeClasspath
+}
