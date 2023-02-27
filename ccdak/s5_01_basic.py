@@ -13,22 +13,40 @@ kafka_jar = os.path.join(os.path.abspath(os.path.dirname(__file__)), FLINK_SQL_C
 table_env.get_config().set("pipeline.jars", f"file://{kafka_jar}")
 
 ## create kafka source table
+# table_env.execute_sql(
+#     f"""
+#     CREATE TABLE input (
+#         mykey VARCHAR,
+#         myvalue VARCHAR
+#     ) WITH (
+#         'connector' = 'kafka',
+#         'topic' = 'streams-input-topic',
+#         'properties.bootstrap.servers' = '{BOOTSTRAP_SERVERS}',
+#         'properties.group.id' = 'source-demo',
+#         'scan.startup.mode' = 'earliest-offset',
+#         'key.format' = 'json',
+#         'key.json.ignore-parse-errors' = 'true',
+#         'key.fields' = 'mykey',
+#         'value.format' = 'json',
+#         'value.json.fail-on-missing-field' = 'false',
+#         'value.fields-include' = 'EXCEPT_KEY'
+#     )
+#     """
+# )
 table_env.execute_sql(
     f"""
     CREATE TABLE input (
-        mykey VARCHAR,
-        myvalue VARCHAR
+        k VARCHAR,
+        v VARCHAR
     ) WITH (
         'connector' = 'kafka',
         'topic' = 'streams-input-topic',
         'properties.bootstrap.servers' = '{BOOTSTRAP_SERVERS}',
         'properties.group.id' = 'source-demo',
         'scan.startup.mode' = 'earliest-offset',
-        'key.format' = 'json',
-        'key.json.ignore-parse-errors' = 'true',
-        'key.fields' = 'mykey',
-        'value.format' = 'json',
-        'value.json.fail-on-missing-field' = 'false',
+        'key.format' = 'raw',
+        'key.fields' = 'k',
+        'value.format' = 'raw',
         'value.fields-include' = 'EXCEPT_KEY'
     )
     """
@@ -49,20 +67,36 @@ table_env.execute_sql(
 )
 
 ## create kafka sink table
+# table_env.execute_sql(
+#     f"""
+#     CREATE TABLE output (
+#         mykey VARCHAR,
+#         myvalue VARCHAR
+#     ) WITH (
+#         'connector' = 'kafka',
+#         'topic' = 'streams-output-topic',
+#         'properties.bootstrap.servers' = '{BOOTSTRAP_SERVERS}',
+#         'key.format' = 'json',
+#         'key.json.ignore-parse-errors' = 'true',
+#         'key.fields' = 'mykey',
+#         'value.format' = 'json',
+#         'value.json.fail-on-missing-field' = 'false',
+#         'value.fields-include' = 'EXCEPT_KEY'
+#     )
+#     """
+# )
 table_env.execute_sql(
     f"""
     CREATE TABLE output (
-        mykey VARCHAR,
-        myvalue VARCHAR
+        k VARCHAR,
+        v VARCHAR
     ) WITH (
         'connector' = 'kafka',
         'topic' = 'streams-output-topic',
         'properties.bootstrap.servers' = '{BOOTSTRAP_SERVERS}',
-        'key.format' = 'json',
-        'key.json.ignore-parse-errors' = 'true',
-        'key.fields' = 'mykey',
-        'value.format' = 'json',
-        'value.json.fail-on-missing-field' = 'false',
+        'key.format' = 'raw',
+        'key.fields' = 'k',
+        'value.format' = 'raw',
         'value.fields-include' = 'EXCEPT_KEY'
     )
     """
