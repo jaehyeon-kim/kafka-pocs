@@ -14,13 +14,12 @@ table_env = TableEnvironment.create(env_settings)
 # https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/dev/python/dependency_management/
 kafka_jar = os.path.join(os.path.abspath(os.path.dirname(__file__)), FLINK_SQL_CONNECTOR_KAFKA)
 table_env.get_config().set("pipeline.jars", f"file://{kafka_jar}")
-table_env.get_config().set("table.exec.source.idle-timeout", "500")
 
 ## create kafka source table
 table_env.execute_sql(
     f"""
     CREATE TABLE input (
-        k VARCHAR,
+        kk VARCHAR,
         v VARCHAR
     ) WITH (
         'connector' = 'kafka',
@@ -29,7 +28,7 @@ table_env.execute_sql(
         'properties.group.id' = 'source-demo',
         'scan.startup.mode' = 'earliest-offset',
         'key.format' = 'raw',
-        'key.fields' = 'k',
+        'key.fields' = 'kk',
         'value.format' = 'raw',
         'value.fields-include' = 'EXCEPT_KEY'
     )
@@ -65,7 +64,7 @@ class MyAggregateFunction(AggregateFunction):
 
     def get_accumulator_type(self):
         return DataTypes.ROW(
-            [DataTypes.FIELD("k", DataTypes.STRING()), DataTypes.FIELD("v", DataTypes.STRING())]
+            [DataTypes.FIELD("kk", DataTypes.STRING()), DataTypes.FIELD("v", DataTypes.STRING())]
         )
 
     def get_result_type(self):
@@ -87,17 +86,18 @@ agg = udaf(
     name=str(func.__class__.__name__),
 )
 res = (
-    tbl.group_by(col("k"))
+    tbl.group_by(col("kk"))
     .aggregate(agg.alias("wc", "cc", "w"))
-    .select(col("k"), col("wc"), col("cc"), col("w"))
+    .select(col("kk"), col("wc"), col("cc"), col("w"))
 )
+print("\naggregation transformations")
 res.print_schema()
 
 ## create print sink table
 table_env.execute_sql(
     f"""
     CREATE TABLE print (
-        k VARCHAR,
+        kk VARCHAR,
         wc BIGINT,
         cc BIGINT,
         w VARCHAR
@@ -108,26 +108,30 @@ table_env.execute_sql(
 )
 
 
-# ## create kafka sink table
-# table_env.execute_sql(
-#     f"""
-#     CREATE TABLE output (
-#         k VARCHAR,
-#         v VARCHAR
-#     ) WITH (
-#         'connector' = 'kafka',
-#         'topic' = 'stateless-transformations-output-topic',
-#         'properties.bootstrap.servers' = '{BOOTSTRAP_SERVERS}',
-#         'key.format' = 'raw',
-#         'key.fields' = 'k',
-#         'value.format' = 'raw',
-#         'value.fields-include' = 'EXCEPT_KEY'
-#     )
-#     """
-# )
+## create kafka sink table
+table_env.execute_sql(
+    f"""
+    CREATE TABLE output (
+        kk VARCHAR,
+        wc BIGINT,
+        cc BIGINT,
+        w VARCHAR,
+        PRIMARY KEY (kk) NOT ENFORCED
+    ) WITH (
+        'connector' = 'upsert-kafka',
+        'topic' = 'aggregations-output-topic',
+        'properties.bootstrap.servers' = '{BOOTSTRAP_SERVERS}',
+        'key.format' = 'raw',
+        'key.fields-prefix' = 'k',
+        'value.format' = 'json',
+        'value.json.fail-on-missing-field' = 'false',
+        'value.fields-include' = 'EXCEPT_KEY'
+    )
+    """
+)
 
 # ## insert into sink tables
 statement_set = table_env.create_statement_set()
 statement_set.add_insert("print", res)
-# statement_set.add_insert("output", mtbl)
+statement_set.add_insert("output", res)
 statement_set.execute().wait()
