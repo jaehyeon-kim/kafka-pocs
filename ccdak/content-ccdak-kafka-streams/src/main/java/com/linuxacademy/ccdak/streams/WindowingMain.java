@@ -36,7 +36,8 @@ public class WindowingMain {
         KGroupedStream<String, String> groupedStream = source.groupByKey();
         
         // Apply windowing to the stream with tumbling time windows of 10 seconds.
-        TimeWindowedKStream<String, String> windowedStream = groupedStream.windowedBy(TimeWindows.of(Duration.ofSeconds(10)));
+        TimeWindowedKStream<String, String> windowedStream = groupedStream.windowedBy(TimeWindows.of(Duration.ofSeconds(10))); // tumbling windows
+        TimeWindowedKStream<String, String> windowedStream = groupedStream.windowedBy(TimeWindows.of(Duration.ofSeconds(10)).advancedBy(Duration.ofSeconds(4))); // hopping windows
         
         // Combine the values of all records with the same key into a string separated by spaces, using 10-second windows.
         KTable<Windowed<String>, String> reducedTable = windowedStream.reduce((aggValue, newValue) -> aggValue + " " + newValue);

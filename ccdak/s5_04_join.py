@@ -1,9 +1,11 @@
 import os
 
-from pyflink.common import Row
-from pyflink.table import EnvironmentSettings, TableEnvironment, DataTypes
-from pyflink.table.expressions import col
-from pyflink.table.udf import AggregateFunction, udaf
+from pyflink.table import EnvironmentSettings, TableEnvironment
+
+####
+#### pyflink.util.exceptions.TableException: org.apache.flink.table.api.TableException: Processing time Window Join is not supported yet.
+####    - retry with event time, need to create dedicated producer???
+####
 
 BOOTSTRAP_SERVERS = os.getenv("BOOTSTRAP_SERVERS", "localhost:9093")
 # https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/connectors/table/kafka/
@@ -39,39 +41,64 @@ tbl_left = table_env.from_path("tbl_left")
 print("\ncreate kafka source table - tbl_left")
 tbl_left.print_schema()
 
-# table_env.execute_sql(
-#     f"""
-#     CREATE TABLE right (
-#         kk VARCHAR,
-#         v VARCHAR,
-#         proctime AS PROCTIME()
-#     ) WITH (
-#         'connector' = 'kafka',
-#         'topic' = 'joins-input-topic-right',
-#         'properties.bootstrap.servers' = '{BOOTSTRAP_SERVERS}',
-#         'properties.group.id' = 'source-demo',
-#         'scan.startup.mode' = 'earliest-offset',
-#         'key.format' = 'raw',
-#         'key.fields' = 'kk',
-#         'value.format' = 'raw',
-#         'value.fields-include' = 'EXCEPT_KEY'
-#     )
-#     """
-# )
-# right = table_env.from_path("right")
-# print("\ncreate kafka source table - right")
-# right.print_schema()
+table_env.execute_sql(
+    f"""
+    CREATE TABLE tbl_right (
+        kk VARCHAR,
+        v VARCHAR,
+        proctime AS PROCTIME()
+    ) WITH (
+        'connector' = 'kafka',
+        'topic' = 'joins-input-topic-right',
+        'properties.bootstrap.servers' = '{BOOTSTRAP_SERVERS}',
+        'properties.group.id' = 'source-demo',
+        'scan.startup.mode' = 'earliest-offset',
+        'key.format' = 'raw',
+        'key.fields' = 'kk',
+        'value.format' = 'raw',
+        'value.fields-include' = 'EXCEPT_KEY'
+    )
+    """
+)
+tbl_right = table_env.from_path("tbl_right")
+print("\ncreate kafka source table - tbl_right")
+tbl_right.print_schema()
 
-# ## join transformations
-# inner = left.join(right)
+## join transformations
+inner_joined = table_env.sql_query(
+    """
+    SELECT COALESCE(l.kk, r.kk) AS kk,
+           l.kk AS l_kk, 
+           l.v AS l_v, 
+           r.kk AS r_kk, 
+           r.v AS r_v,
+           'inner' AS join_type,
+           COALESCE(l.window_start, r.window_start) AS window_start,
+           COALESCE(l.window_end, r.window_end) AS window_end
+           FROM (
+            SELECT * FROM TABLE(TUMBLE(TABLE tbl_left, DESCRIPTOR(proctime), INTERVAL '5' MINUTES))
+           ) l
+           JOIN (
+            SELECT * FROM TABLE(TUMBLE(TABLE tbl_right, DESCRIPTOR(proctime), INTERVAL '5' MINUTES))
+           ) r
+           ON l.window_start = r.window_start AND l.window_end = r.window_end
+    """
+)
+print("\ninner joined")
+inner_joined.print_schema()
 
 ## create print sink table
 table_env.execute_sql(
     f"""
     CREATE TABLE print (
         kk VARCHAR,
-        v VARCHAR,
-        proctime TIMESTAMP_LTZ(3)
+        l_kk VARCHAR,
+        l_v VARCHAR,
+        r_kk VARCHAR,
+        r_v VARCHAR,
+        join_type VARCHAR,
+        window_start TIMESTAMP(3),
+        window_end TIMESTAMP(3)
     ) WITH (
         'connector' = 'print'
     )
@@ -103,6 +130,6 @@ table_env.execute_sql(
 
 # ## insert into sink tables
 statement_set = table_env.create_statement_set()
-statement_set.add_insert("print", tbl_left)
+statement_set.add_insert("print", inner_joined)
 # statement_set.add_insert("output", res)
 statement_set.execute().wait()
