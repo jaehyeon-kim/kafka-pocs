@@ -1,4 +1,5 @@
 import os
+import re
 import datetime
 import string
 import json
@@ -32,7 +33,7 @@ class Order:
         ]
 
     def create(self, num: int):
-        return [{**self.order(), **{"items": self.items()}} for _ in range(num)]
+        return [{**self.order(), **{"items": json.dumps(self.items())}} for _ in range(num)]
 
 
 class Producer:
@@ -57,7 +58,7 @@ class Producer:
 
     def serialize(self, obj):
         if isinstance(obj, datetime.datetime):
-            return obj.isoformat()
+            return re.sub("T", " ", obj.isoformat(timespec="milliseconds"))
         if isinstance(obj, datetime.date):
             return str(obj)
         return obj

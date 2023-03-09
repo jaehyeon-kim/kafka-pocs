@@ -33,7 +33,7 @@ locals {
   region      = data.aws_region.current.name
   environment = "dev"
 
-  infra_prefix = "integration-redshift"
+  infra_prefix = "integration-athena"
 
   producer = {
     src_path          = "src"
@@ -47,7 +47,7 @@ locals {
     to_enable_trigger = false
     environment = {
       topic_name  = "orders"
-      max_run_sec = 60
+      max_run_sec = 10
     }
   }
 
