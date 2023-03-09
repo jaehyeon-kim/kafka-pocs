@@ -69,6 +69,16 @@ output "msk_bootstrap_brokers_sasl_iam" {
 }
 
 # Athena related
+output "athena_connector_stack_id" {
+  description = "Athena connector stack ID"
+  value       = aws_serverlessapplicationrepository_cloudformation_stack.athena_msk_connector.id
+}
+
+output "athena_connector_stack_outputs" {
+  description = "Athena connector stack outputs"
+  value       = aws_serverlessapplicationrepository_cloudformation_stack.athena_msk_connector.outputs
+}
+
 output "athena_connector_role_arn" {
   description = "ARN of athena connector execution role"
   value       = aws_iam_role.athena_connector_role.arn
@@ -77,4 +87,14 @@ output "athena_connector_role_arn" {
 output "athena_connector_sg_id" {
   description = "Athena connector security group ID"
   value       = aws_security_group.athena_connector.id
+}
+
+output "aws_glue_registry_name" {
+  description = "Glue schema registry name"
+  value       = aws_glue_registry.msk_registry.registry_name
+}
+
+output "aws_glue_schema_name" {
+  description = "Glue schema name"
+  value       = aws_glue_schema.msk_schema.schema_name
 }
