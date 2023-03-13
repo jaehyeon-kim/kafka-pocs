@@ -87,14 +87,14 @@ resource "aws_security_group_rule" "msk_lambda_inbound" {
   source_security_group_id = aws_security_group.kafka_producer_lambda.id
 }
 
-resource "aws_security_group_rule" "msk_redshift_inbound" {
+resource "aws_security_group_rule" "msk_athena_connector_inbound" {
   type                     = "ingress"
-  description              = "redshift access"
+  description              = "athena connector access"
   security_group_id        = aws_security_group.msk.id
   protocol                 = "tcp"
   from_port                = 9098
   to_port                  = 9098
-  source_security_group_id = aws_security_group.redshift_serverless.id
+  source_security_group_id = aws_security_group.athena_connector.id
 }
 
 # resource "aws_security_group_rule" "msk_self_inbound" {

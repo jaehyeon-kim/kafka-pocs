@@ -68,28 +68,33 @@ output "msk_bootstrap_brokers_sasl_iam" {
   value       = aws_msk_cluster.msk_data_cluster.bootstrap_brokers_sasl_iam
 }
 
-# redshift resources
-output "redshift_ns_name" {
-  description = "Redshift serverless namespace name"
-  value       = aws_redshiftserverless_namespace.namespace.id
+# Athena related
+output "athena_connector_stack_id" {
+  description = "Athena connector stack ID"
+  value       = aws_serverlessapplicationrepository_cloudformation_stack.athena_msk_connector.id
 }
 
-output "redshift_ns_id" {
-  description = "Redshift serverless namespace id"
-  value       = aws_redshiftserverless_namespace.namespace.namespace_id
+output "athena_connector_stack_outputs" {
+  description = "Athena connector stack outputs"
+  value       = aws_serverlessapplicationrepository_cloudformation_stack.athena_msk_connector.outputs
 }
 
-output "redshift_wg_name" {
-  description = "Redshift serverless workgroup name"
-  value       = aws_redshiftserverless_workgroup.workgroup.id
+output "athena_connector_role_arn" {
+  description = "ARN of athena connector execution role"
+  value       = aws_iam_role.athena_connector_role.arn
 }
 
-output "redshift_wg_id" {
-  description = "Redshift serverless workgroup name"
-  value       = aws_redshiftserverless_workgroup.workgroup.workgroup_id
+output "athena_connector_sg_id" {
+  description = "Athena connector security group ID"
+  value       = aws_security_group.athena_connector.id
 }
 
-output "redshift_wg_endpoint" {
-  description = "Endpoint that is created from the workgroup"
-  value       = aws_redshiftserverless_workgroup.workgroup.endpoint
+output "aws_glue_registry_name" {
+  description = "Glue schema registry name"
+  value       = aws_glue_registry.msk_registry.registry_name
+}
+
+output "aws_glue_schema_name" {
+  description = "Glue schema name"
+  value       = aws_glue_schema.msk_schema.schema_name
 }

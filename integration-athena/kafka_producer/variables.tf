@@ -33,7 +33,7 @@ locals {
   region      = data.aws_region.current.name
   environment = "dev"
 
-  infra_prefix = "integration-redshift"
+  infra_prefix = "integration-athena"
 
   producer = {
     src_path          = "src"
@@ -44,7 +44,7 @@ locals {
     memory_size       = 128
     runtime           = "python3.8"
     schedule_rate     = "rate(1 minute)"
-    to_enable_trigger = false
+    to_enable_trigger = true
     environment = {
       topic_name  = "orders"
       max_run_sec = 60
