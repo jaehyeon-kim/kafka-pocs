@@ -409,39 +409,151 @@ If you get stuck, feel free to check out the solution video, or the detailed ins
 ####
 # https://docs.confluent.io/5.2.4/quickstart/ce-docker-quickstart.html
 # https://github.com/confluentinc/cp-all-in-one/blob/7.3.0-post/cp-all-in-one/docker-compose.yml
+# https://docs.confluent.io/platform/current/kafka-rest/quickstart.html
 
 ### producing message
 ./kafka-topics.sh --bootstrap-server localhost:9092 --create \
-  --topic rest-test-topic --partitions 1 --replication-factor 1
+  --topic jsontest --partitions 1 --replication-factor 1
 
 curl -X POST \
   -H "Content-Type: application/vnd.kafka.json.v2+json" \
-  -H "Accept: application/vnd.kafka..v2+json" \
   --data '{"records": [{"key": "message", "value": "Hello"}, {"key": "message", "value": "World"}]}' \
-  "http://localhost:8082/topics/rest-test-topic"
+  "http://localhost:8082/topics/jsontest"
+# {"offsets":[{"partition":0,"offset":0,"error_code":null,"error":null},{"partition":0,"offset":1,"error_code":null,"error":null}],"key_schema_id":null,"value_schema_id":null}
 
 ./kafka-console-consumer.sh --bootstrap-server localhost:9092 \
-  --topic rest-test-topic --from-beginning --property print.key=true
+  --topic jsontest --from-beginning --property print.key=true
 
 ### consuming messages
-# 1. create a consumer (my_json_consumer) and consumer instance (my_consumer_instance)
+# 1. create a consumer (jsontest) and consumer instance (jsontest_instance)
 curl -X POST \
-  -H "Content-Type: application/vnd.kafka.json.v2+json" \
-  --data '{"name": "my_consumer_instance", "format": "json", "auto.offset.reset": "earliest"}' \
-  "http://localhost:8082/consumers/my_json_consumer"
+  -H "Content-Type: application/vnd.kafka.v2+json" \
+  --data '{"name": "jsontest_instance", "format": "json", "auto.offset.reset": "earliest"}' \
+  http://localhost:8082/consumers/jsontest
+# {"instance_id":"jsontest_instance","base_uri":"http://localhost:8082/consumers/jsontest/instances/jsontest_instance"}
 
 # 2. subscribe the consumer instance to a topic - can subscribe multiple topics
 curl -X POST \
-  -H "Content-Type: application/vnd.kafka.json.v2+json" \
-  --data '{"topics": ["rest-test-topic"]}' \
-  "http://localhost:8082/consumers/my_json_consumer/instances/my_consumer_instance/subscription"
+  -H "Content-Type: application/vnd.kafka.v2+json" \
+  --data '{"topics":["jsontest"]}' \
+  http://localhost:8082/consumers/jsontest/instances/jsontest_instance/subscription
 
 # 3. consume messages
 curl -X GET \
-  -H "Content-Type: application/vnd.kafka.json.v2+json" \
-  "http://localhost:8082/consumers/my_json_consumer/instances/my_consumer_instance/records"
+  -H "Accept: application/vnd.kafka.json.v2+json" \
+  http://localhost:8082/consumers/jsontest/instances/jsontest_instance/records
+# [{"topic":"jsontest","key":"message","value":"Hello","partition":0,"offset":0},{"topic":"jsontest","key":"message","value":"World","partition":0,"offset":1}]
 
 # 4. close consumer
 curl -X DELETE \
+  -H "Content-Type: application/vnd.kafka.v2+json" \
+  http://localhost:8082/consumers/jsontest/instances/jsontest_instance
+
+###
+### Producing Kafka Messages with Confluent REST Proxy
+###
+# Your supermarket company is using Kafka to handle messaging as part of its infrastructure. 
+# Recently, some data was lost before it could be published to Kafka due to a power failure in a data center. 
+# You have been asked to publish these lost records to the necessary topics manually. 
+# Luckily, Confluent REST Proxy is installed and can be used to interact with Kafka using simple HTTP requests easily.
+
+# Using Confluent REST Proxy, publish the following records to the Kafka cluster.
+
+# Publish to the inventory_purchases topic:
+# Key: apples, Value: 23
+# Key: grapes, Value: 160
+
+# Publish to the member_signups topic:
+# Key: 77543, Value: Rosenberg, Willow
+# Key: 56878, Value: Giles, Rupert
+
+## inventory purchases
+./kafka-topics.sh --bootstrap-server localhost:9092 --create \
+  --topic inventory_purchases --partitions 1 --replication-factor 1
+
+curl -X POST \
   -H "Content-Type: application/vnd.kafka.json.v2+json" \
-  "http://localhost:8082/consumers/my_json_consumer/instances/my_consumer_instance/records"
+  --data '{"records": [{"key": "apples", "value": "23"}, {"key": "grapes", "value": "160"}]}' \
+  http://localhost:8082/topics/inventory_purchases
+
+./kafka-console-consumer.sh --bootstrap-server localhost:9092 \
+  --topic inventory_purchases --from-beginning --property print.key=true
+
+## member signups
+./kafka-topics.sh --bootstrap-server localhost:9092 --create \
+  --topic member_signups --partitions 1 --replication-factor 1
+
+curl -X POST \
+  -H "Content-Type: application/vnd.kafka.json.v2+json" \
+  --data '{"records": [{"key": "77543", "value": "Rosenberg, Willow"}, {"key": "56878", "value": "Giles, Rupert"}]}' \
+  http://localhost:8082/topics/member_signups
+
+./kafka-console-consumer.sh --bootstrap-server localhost:9092 \
+  --topic member_signups --from-beginning --property print.key=true
+
+###
+### Consuming Kafka Messages with Confluent REST Proxy
+###
+# Your supermarket company is using Kafka to handle messaging as part of its infrastructure. 
+# They want to prepare a report that requires some data that is currently stored in Kafka.
+
+# You have been asked to access the cluster and provide some data points that will be used in this report. 
+# Luckily, the Confluent REST Proxy will make it easy for you to gather the necessary data using simple HTTP requests. 
+# Obtain the requested data points and place them in the specified output files.
+
+# First, the report will need to include the number of apples sold in the last week. 
+# This information can be found in a topic called weekly_sales. The records in this topic represent aggregate data. 
+# Find the latest record with a key of apples and write its value to the file located at /home/cloud_user/output/apple_sales.txt.
+
+# Secondly, the report needs to include the current quarterly balance for product purchases. 
+# Read from the topic called quarterly_purchases. 
+# Find the latest record and write its value to the file located at /home/cloud_user/output/quarterly_balance.txt.
+
+# If you get stuck, feel free to check out the solution video, or the detailed instructions under each objective. Good luck!
+
+# >>> Will just read records from those that are created in the previous lab.
+
+# 1. create a consumer
+curl -X POST \
+  -H "Content-Type: application/vnd.kafka.v2+json" \
+  --data '{"name": "lab_instance", "format": "json", "auto.offset.reset": "earliest"}' \
+  http://localhost:8082/consumers/lab
+
+# 2. subscribe the consumer instance to topics
+curl -X POST \
+  -H "Content-Type: application/vnd.kafka.v2+json" \
+  --data '{"topics":["inventory_purchases", "member_signups"]}' \
+  http://localhost:8082/consumers/lab/instances/lab_instance/subscription
+
+# 3. consume messages
+curl -X GET \
+  -H "Accept: application/vnd.kafka.json.v2+json" \
+  http://localhost:8082/consumers/lab/instances/lab_instance/records
+# [{"topic":"member_signups","key":"77543","value":"Rosenberg, Willow","partition":0,"offset":0},{"topic":"member_signups","key":"56878","value":"Giles, Rupert","partition":0,"offset":1},{"topic":"inventory_purchases","key":"apples","value":"23","partition":0,"offset":0},{"topic":"inventory_purchases","key":"grapes","value":"160","partition":0,"offset":1}]
+
+# 4. close consumer
+curl -X DELETE \
+  -H "Content-Type: application/vnd.kafka.v2+json" \
+  http://localhost:8082/consumers/lab/instances/lab_instance
+
+####
+#### chapter 9
+####
+# Confluent Schema Registry is a versioned, distributed storage for Apache Avro schemas.
+
+# These schemas define an expected format for your data 
+#   and can be used for serialize and deserialize complex data formats when interacting with Kafka.
+
+# Avro schemas allow producers to specify a complex format for published data, 
+#   and consumers can use the schema to interprete this data. Both communicate with the schema registry
+#   to store and retrieve these schemas.
+
+# Schemas can be applied to both keys and values in messages.
+
+# Compatibility
+# Backward
+# - update consumer followed by update producer
+# - because consumer w/ updated schema can read data w/ current schema
+# Forward 
+# - update producer followed by update consumer
+# - because consumer w/ current schema can read data w/ updated schema
