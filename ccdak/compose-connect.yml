@@ -1,0 +1,36 @@
+version: "3.5"
+
+services:
+  kafka-connect:
+    image: docker.io/bitnami/kafka:3.3
+    container_name: connect
+    command: >
+      /opt/bitnami/kafka/bin/connect-distributed.sh
+      /opt/bitnami/kafka/config/connect-distributed.properties
+    ports:
+      - "8083:8083"
+    networks:
+      - kafkanet
+    volumes:
+      - "./connect/config/connect-distributed.properties:/opt/bitnami/kafka/config/connect-distributed.properties"
+      - "./connect/connectors/file-sink:/opt/connectors/file-sink"
+      - "./connect/connectors/debezium-connector-postgres:/opt/connectors/debezium-connector-postgres"
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    command: ["postgres", "-c", "wal_level=logical"]
+    ports:
+      - 5432:5432
+    networks:
+      - kafkanet
+    volumes:
+      - ./connect/sql:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_DB=main
+      - POSTGRES_USER=master
+      - POSTGRES_PASSWORD=password
+
+networks:
+  kafkanet:
+    external: true
+    name: kafka-network

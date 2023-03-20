@@ -611,3 +611,144 @@ Then, update the producer to set this new field on the records it is producing. 
 The consumer writes its output to a data file located at /home/cloud_user/output/output.txt. Once all changes are made, and everything is working, you should see the member_id field reflected in the data written to that file.
 There is a starter project on GitHub at https://github.com/linuxacademy/content-ccdak-schema-evolve-lab.git. Clone this project to the broker and edit its files to implement the solution.
 If you get stuck, feel free to check out the solution video, or the detailed instructions under each objective. Good luck!
+
+####
+#### chapter 9
+####
+https://kafka.apache.org/documentation.html#connect_rest
+
+file sink connector - https://jar-download.com/artifacts/org.apache.kafka/connect-file/2.1.0/source-code/org/apache/kafka/connect/file/FileStreamSinkConnector.java
+debezium connector - https://repo1.maven.org/maven2/io/debezium/debezium-connector-postgres/2.1.3.Final/debezium-connector-postgres-2.1.3.Final-plugin.tar.gz
+
+###
+### LAB Exporting Data to a File with Kafka Connect
+###
+# Your supermarket company is using Kafka to manage some data. 
+# They want to export data from a topic to a data file on the disk for analysis. 
+# You have been asked to set up a connector to automatically export records from the inventory_purchases topic to a file 
+#   located at /home/cloud_user/output/output.txt.
+
+# Use the following information as you implement a solution:
+
+# The connector class org.apache.kafka.connect.file.FileStreamSinkConnector can be used to export data to a file.
+# Set the number of tasks to 1.
+# The data in the topic is string data, so use org.apache.kafka.connect.storage.StringConverter for key.converter and value.converter.
+# Here is an example of a connector configuration for a FileStream Sink Connector:
+
+# "connector.class": "org.apache.kafka.connect.file.FileStreamSinkConnector",
+# "tasks.max": "1",
+# "file": "<file path>",
+# "topics": "<topic>",
+# "key.converter": "<key converter>",
+# "value.converter": "<value converter>"
+# Once you have set up the connector, publish a new record to the topic for a purchase of plums:
+
+# kafka-console-producer --broker-list localhost:9092 --topic inventory_purchases
+
+# plums:5
+# Check the file to verify that the new record appears:
+
+# cat /home/cloud_user/output/output.txt
+# If you get stuck, feel free to check out the solution video, or the detailed instructions under each objective. Good luck!
+
+curl -s -X GET http://localhost:8083/connector-plugins
+# [{"class":"org.apache.kafka.connect.file.FileStreamSinkConnector","type":"sink","version":"3.3.2"},{"class":"org.apache.kafka.connect.file.FileStreamSourceConnector","type":"source","version":"3.3.2"},{"class":"org.apache.kafka.connect.mirror.MirrorCheckpointConnector","type":"source","version":"3.3.2"},{"class":"org.apache.kafka.connect.mirror.MirrorHeartbeatConnector","type":"source","version":"3.3.2"},{"class":"org.apache.kafka.connect.mirror.MirrorSourceConnector","type":"source","version":"3.3.2"}]
+
+curl -X POST http://localhost:8083/connectors \
+  -H 'Accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "file_sink_connector",
+    "config": {
+      "connector.class": "org.apache.kafka.connect.file.FileStreamSinkConnector",
+      "tasks.max": "1",
+      "topics": "connect_topic",
+      "file": "/tmp/output.txt",
+      "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+      "value.converter": "org.apache.kafka.connect.storage.StringConverter"
+    }
+  }'
+# {"name":"file_sink_connector","config":{"connector.class":"org.apache.kafka.connect.file.FileStreamSinkConnector","tasks.max":"1","topics":"connect_topic","file":"/tmp/output.txt","key.converter":"org.apache.kafka.connect.storage.StringConverter","value.converter":"org.apache.kafka.connect.storage.StringConverter","name":"file_sink_connector"},"tasks":[],"type":"sink"}
+
+curl http://localhost:8083/connectors/file_sink_connector
+# {"name":"file_sink_connector","config":{"connector.class":"org.apache.kafka.connect.file.FileStreamSinkConnector","file":"/tmp/output.txt","tasks.max":"1","topics":"connect_topic","name":"file_sink_connector","value.converter":"org.apache.kafka.connect.storage.StringConverter","key.converter":"org.apache.kafka.connect.storage.StringConverter"},"tasks":[{"connector":"file_sink_connector","task":0}],"type":"sink"}
+
+curl http://localhost:8083/connectors/file_sink_connector/status
+# {"name":"file_sink_connector","connector":{"state":"RUNNING","worker_id":"172.31.0.7:8083"},"tasks":[{"id":0,"state":"RUNNING","worker_id":"172.31.0.7:8083"}],"type":"sink"}
+
+./kafka-console-producer.sh --bootstrap-server localhost:9092 --topic connect_topic --property parse.key=true --property key.separator=:
+plums:5
+
+curl -X DELETE http://localhost:8083/connectors/file_sink_connector
+
+###
+### LAB Importing Data from a Database with Kafka Connect
+###
+# Your supermarket company is using Kafka to manage some of its data. 
+# They have a PostgreSQL database that contains some important data, 
+# but they want to use Kafka to perform stream processing on this data. 
+# You have been asked to implement a Connector to load this data from the database into Kafka. 
+# Configure this connector so that new records will be automatically loaded into Kafka as they are created in the database.
+
+# Use the following information as you implement a solution:
+
+# The database name on the PostgreSQL server is inventory.
+# A database user has been set up which you can use to connect. The credentials are username kafka and password Kafka!.
+# Use a topic prefix of postgres- so that the topics created by the connector will be identifiable as coming from the PostgreSQL database.
+# The database can be reached at the IP address 10.0.1.102 on port 5432. You can use a JDBC string like this to connect to the database: jdbc:postgresql://10.0.1.102:5432/<database name>.
+# The connector class io.confluent.connect.jdbc.JdbcSourceConnector can be used to pull data from databases using JDBC.
+# Here is an example of a connector configuration for a JDBC Source Connector:
+
+# "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+# "connection.url": "jdbc:postgresql://10.0.1.102:5432/<database name>",
+# "connection.user": "<database user>",
+# "connection.password": "<database password>",
+# "topic.prefix": "postgres-",
+# "mode":"timestamp",
+# "timestamp.column.name": "update_ts"
+
+# Once you have set up the connector, log in to the database server and insert a new record for a purchase of plums into the purchases table within the inventory database. Afterward, verify that the new record is automatically ingested into the Kafka topic by the connector. You can insert a new record like so:
+
+# sudo -i -u postgres
+
+# psql
+
+# \c inventory;
+
+# insert into purchases (product, quantity, purchase_time, update_ts) VALUES ('plums', 8, current_timestamp, current_timestamp);
+# You can check your topic like so verify the data that is being ingested:
+
+# kafka-console-consumer --bootstrap-server localhost:9092 --topic postgres-purchases --from-beginning
+# After inserting the new record in the database, it should automatically appear in the topic.
+
+# If you get stuck, feel free to check out the solution video, or the detailed instructions under each objective. Good luck!
+
+curl -X POST http://localhost:8083/connectors \
+  -H 'Accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "inventory_source_connector",
+    "config": {
+      "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+      "tasks.max": "1",
+      "plugin.name": "pgoutput",
+      "publication.name": "cdc_publication",
+      "slot.name": "inventory",
+      "database.hostname": "postgres",
+      "database.port": "5432",
+      "database.user": "master",
+      "database.password": "password",
+      "database.dbname": "main",
+      "database.server.name": "inv",
+      "schema.include": "ods",
+      "table.include.list": "ods.purchases",
+      "topic.prefix": "postgres-",
+      "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter"
+    }
+  }'
+# {"name":"inventory_source_connector","config":{"connector.class":"io.debezium.connector.postgresql.PostgresConnector","tasks.max":"1","plugin.name":"pgoutput","publication.name":"cdc_publication","slot.name":"inventory","database.hostname":"postgres","database.port":"5432","database.user":"master","database.password":"password","database.dbname":"main","database.server.name":"inv","schema.include":"ods","table.include.list":"ods.purchases","topic.prefix":"postgres-","key.converter":"org.apache.kafka.connect.json.JsonConverter","value.converter":"org.apache.kafka.connect.json.JsonConverter","name":"inventory_source_connector"},"tasks":[],"type":"source"}
+
+curl http://localhost:8083/connectors/inventory_source_connector
+
+curl http://localhost:8083/connectors/inventory_source_connector/status

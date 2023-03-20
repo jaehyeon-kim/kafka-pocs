@@ -4,6 +4,8 @@
 .deep-dive
 *.pem
 *-demo-data
+debezium-connector-postgres
+file-sink
 
 ## sam
 .aws-sam*
