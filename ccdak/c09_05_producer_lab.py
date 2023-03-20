@@ -3,18 +3,18 @@ import dataclasses
 from typing import List
 import boto3
 import botocore.exceptions
-from aws_schema_registry import DataAndSchema, SchemaRegistryClient
+from aws_schema_registry import SchemaRegistryClient
 from aws_schema_registry.avro import AvroSchema
 from aws_schema_registry.adapter.kafka import KafkaSerializer
 from kafka import KafkaProducer
 
 
 @dataclasses.dataclass
-class Person:
+class Purchase:
     id: int
-    first_name: str
-    last_name: str
-    email: str
+    name: str
+    quantity: int
+    member_id: int = 0
 
     def asdict(self):
         return dataclasses.asdict(self)
@@ -40,12 +40,12 @@ class Producer:
             value_serializer=self.serializer,
         )
 
-    def send(self, persons: List[Person], schema: AvroSchema):
+    def send(self, purchases: List[Purchase], schema: AvroSchema):
         if not self.check_registry():
             self.create_registry()
 
-        for person in persons:
-            data = person.asdict()
+        for purchase in purchases:
+            data = purchase.asdict()
             self.producer.send(self.topic_name, key=str(data["id"]), value=(data, schema))
         self.producer.flush()
 
@@ -71,25 +71,22 @@ class Producer:
 
 
 if __name__ == "__main__":
-    persons = [
-        Person(125745, "Kenny", "Armstrong", "kenny@linuxacademy.com"),
-        Person(943256, "Terry", "Cox", "terry@linuxacademy.com"),
-    ]
+    purchases = [Purchase(3, "apples", 12), Purchase(4, "grapes", 23, 1)]
     schema = AvroSchema(
         {
             "namespace": "com.linuxacademy.ccdak.schemaregistry",
             "type": "record",
-            "name": "Person",
+            "name": "Purchase",
             "fields": [
                 {"name": "id", "type": "int"},
-                {"name": "first_name", "type": "string"},
-                {"name": "last_name", "type": "string"},
-                {"name": "email", "type": "string"},
+                {"name": "name", "type": "string"},
+                {"name": "quantity", "type": "int"},
+                {"name": "member_id", "type": "int", "default": 0},
             ],
         }
     )
     producer = Producer(
         bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS", "localhost:9093").split(","),
-        topic_name="persons",
+        topic_name="purchases",
         registry_name="ccdak",
-    ).send(persons, schema)
+    ).send(purchases, schema)

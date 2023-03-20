@@ -450,7 +450,7 @@ curl -X DELETE \
   http://localhost:8082/consumers/jsontest/instances/jsontest_instance
 
 ###
-### Producing Kafka Messages with Confluent REST Proxy
+### LAB Producing Kafka Messages with Confluent REST Proxy
 ###
 # Your supermarket company is using Kafka to handle messaging as part of its infrastructure. 
 # Recently, some data was lost before it could be published to Kafka due to a power failure in a data center. 
@@ -492,7 +492,7 @@ curl -X POST \
   --topic member_signups --from-beginning --property print.key=true
 
 ###
-### Consuming Kafka Messages with Confluent REST Proxy
+### LAB Consuming Kafka Messages with Confluent REST Proxy
 ###
 # Your supermarket company is using Kafka to handle messaging as part of its infrastructure. 
 # They want to prepare a report that requires some data that is currently stored in Kafka.
@@ -557,3 +557,57 @@ curl -X DELETE \
 # Forward 
 # - update producer followed by update consumer
 # - because consumer w/ current schema can read data w/ updated schema
+
+###
+### LAB Using Schema Registry in a Kafka Application
+###
+
+# Your supermarket company is using Kafka to manage updates to inventory as purchases are made in real-time. 
+# In the past, data was published to a topic in a basic format, but the company now wants to use a more complex data structure 
+#   with multiple data points in each record. This is a good use case for Confluent Schema Registry. 
+# Create a schema to represent the data and then build a simple producer to publish some sample data using the schema. 
+# Finally, create a consumer to consume this data and output it to a data file.
+
+# There is a starter project on GitHub at https://github.com/linuxacademy/content-ccdak-schema-registry-lab. Clone this project to the broker and edit its files to implement the solution.
+
+# Use the following specification to build a schema called Purchase. You can place the schema file in src/main/avro/com/linuxacademy/ccdak/schemaregistry/.
+
+# Field id with type int. This will contain the purchase id.
+# Field product with type string. This will contain the name of the product purchased.
+# Field quantity with type int. This will contain the quantity of the product purchased.
+# Create a publisher that publishes some sample records using this schema to the inventory_purchases topic.
+
+# Then, create a consumer to read these records and output them to a file located at /home/cloud_user/output/output.txt.
+
+# You can run the producer in the starter project with the command ./gradlew runProducer. 
+# The consumer can be run with ./gradlew runConsumer. Run both the producer and consumer to verify that everything works.
+
+# If you get stuck, feel free to check out the solution video, or the detailed instructions under each objective. Good luck!
+{
+    "namespace": "com.linuxacademy.ccdak.schemaregistry",
+    "type": "record",
+    "name": "Purchase",
+    "fields": [
+        {"name": "id", "type": "int"},
+        {"name": "name", "type": "string"},
+        {"name": "quantity", "type": "int"},
+    ],
+}
+
+###
+### LAB Evolving an Avro Schema in a Kafka Application
+###
+Your supermarket company is using Kafka to track changes in inventory as purchases occur. 
+There is a topic for this data called inventory_purchases, plus a producer and consumer that interact with that topic. 
+The producer and consumer are using an Avro schema to serialize and deserialize the data.
+
+The company has a membership program for customers, and members of the program each have a member ID. 
+The company would like to start tracking this member ID with the data in inventory_purchases. 
+This field should be optional, however, since not all customers participate in the membership program.
+
+Add a new field called member_id to the Purchase schema. Make this field optional with a 0 default. 
+Then, update the producer to set this new field on the records it is producing. Run the producer and consumer to verify that everything works.
+
+The consumer writes its output to a data file located at /home/cloud_user/output/output.txt. Once all changes are made, and everything is working, you should see the member_id field reflected in the data written to that file.
+There is a starter project on GitHub at https://github.com/linuxacademy/content-ccdak-schema-evolve-lab.git. Clone this project to the broker and edit its files to implement the solution.
+If you get stuck, feel free to check out the solution video, or the detailed instructions under each objective. Good luck!

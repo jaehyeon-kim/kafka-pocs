@@ -1,0 +1,39 @@
+version: "3.5"
+
+services:
+  kafka-ui-glue:
+    image: provectuslabs/kafka-ui:master
+    container_name: kafka-ui-glue
+    ports:
+      - "8080:8080"
+    networks:
+      - kafkanet
+    environment:
+      LOGGING_LEVEL_ROOT: debug
+      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+      AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN
+      KAFKA.clusters.0.name: local
+      KAFKA.clusters.0.bootstrapServers: kafka-0:9092,kafka-1:9092,kafka-2:9092
+      kafka.clusters.0.serde.0.name: GlueSchemaRegistry
+      kafka.clusters.0.serde.0.filePath: /glue-serde/kafkaui-glue-serde-1.0.0.jar
+      kafka.clusters.0.serde.0.className: com.provectus.kafka.ui.serdes.glue.GlueSerde
+      kafka.clusters.0.serde.0.properties.region: $AWS_DEFAULT_REGION #required
+      kafka.clusters.0.serde.0.properties.registry: ccdak #required, name of Glue Schema Registry
+      # # template that will be used to find schema name for topic key. Optional, default is null (not set).
+      # kafka.clusters.0.serde.0.properties.keySchemaNameTemplate: "%s-key"
+      # # template that will be used to find schema name for topic value. Optional, default is  '%s'
+      # kafka.clusters.0.serde.0.properties.valueSchemaNameTemplate: "%s-value"
+      # # schema name -> topics pattern where it will be used for keys. Optional.
+      # kafka.clusters.0.serde.0.properties.topicKeysSchemas.some-topic-key: "some-topic1|some-topic2"
+      # # schema name -> topics pattern where it will be used for values. Optional.
+      # kafka.clusters.0.serde.0.properties.topicValuesSchemas.some-topic-value: "some-topic1|some-topic2"
+      # kafka.clusters.0.serde.0.properties.topicValuesSchemas.another-topic-val: "another-topic-value"
+
+    volumes:
+      - ./glue-serde:/glue-serde
+
+networks:
+  kafkanet:
+    external: true
+    name: kafka-network
