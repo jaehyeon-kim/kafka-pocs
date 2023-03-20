@@ -742,7 +742,7 @@ curl -X POST http://localhost:8083/connectors \
       "database.server.name": "inv",
       "schema.include": "ods",
       "table.include.list": "ods.purchases",
-      "topic.prefix": "postgres-",
+      "topic.prefix": "postgres.",
       "key.converter": "org.apache.kafka.connect.json.JsonConverter",
       "value.converter": "org.apache.kafka.connect.json.JsonConverter"
     }
