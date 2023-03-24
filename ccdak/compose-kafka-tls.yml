@@ -35,10 +35,11 @@ services:
       - KAFKA_CFG_SSL_KEY_PASSWORD=secret
       - KAFKA_CFG_SSL_TRUSTSTORE_LOCATION=/bitnami/kafka/config/certs/kafka.truststore.jks
       - KAFKA_CFG_SSL_TRUSTSTORE_PASSWORD=secret
-      - KAFKA_CFG_SSL_CLIENT_AUTH=none
+      - KAFKA_CFG_SSL_CLIENT_AUTH=required
     volumes:
       - kafka_data:/bitnami/kafka
-      - ./security/keystore/kafka.server.keystore.jks:/bitnami/kafka/config/certs/kafka.keystore.jks:ro
+      - ./security/certs/client.keystore.jks:/bitnami/kafka/config/certs/kafka.keystore.jks:ro
+      # - ./security/keystore/kafka.server.keystore.jks:/bitnami/kafka/config/certs/kafka.keystore.jks:ro
       - ./security/truststore/kafka.truststore.jks:/bitnami/kafka/config/certs/kafka.truststore.jks:ro
     depends_on:
       - zookeeper

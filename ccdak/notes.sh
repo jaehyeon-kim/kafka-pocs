@@ -793,7 +793,8 @@ bash kafka-generate-ssl-automatic.sh
 #     ├── ca-key
 #     └── kafka.truststore.jks
 
-# PLAINTEXT at 9092 and SSL at 9093
+## PLAINTEXT at 9092 and SSL at 9093
+## - KAFKA_CFG_SSL_CLIENT_AUTH=none
 docker-compose -f compose-kafka-tls.yml up -d
 
 docker run --rm -it --network kafka-network \
@@ -813,3 +814,173 @@ docker run --rm -it --network kafka-network \
 ./kafka-console-consumer.sh --bootstrap-server kafka:9093 \
   --topic tls-test --from-beginning \
   --consumer.config /bitnami/kafka/config/client-ssl.properties
+
+#### Client Authentication
+## PLAINTEXT at 9092 and SSL at 9093
+## - KAFKA_CFG_SSL_CLIENT_AUTH=required
+docker run --rm -it --network kafka-network \
+  -v $PWD/security/keystore/kafka.server.keystore.jks:/bitnami/kafka/config/certs/kafka.keystore.jks \
+  -v $PWD/security/truststore/kafka.truststore.jks:/bitnami/kafka/config/certs/kafka.truststore.jks \
+  -v $PWD/security/config/client-ssl.properties:/bitnami/kafka/config/client-ssl.properties \
+  -v $PWD/security/config/client-mutual-tls.properties:/bitnami/kafka/config/client-mutual-tls.properties \
+  bitnami/kafka:3.3 bash
+
+./kafka-topics.sh --bootstrap-server kafka:9092 --create \
+  --topic tls-test --partitions 1 --replication-factor 1
+
+./kafka-console-producer.sh --bootstrap-server kafka:9092 --topic tls-test
+
+./kafka-console-consumer.sh --bootstrap-server kafka:9092 \
+  --topic tls-test --from-beginning
+
+./kafka-console-consumer.sh --bootstrap-server kafka:9093 \
+  --topic tls-test --from-beginning \
+  --consumer.config /bitnami/kafka/config/client-ssl.properties
+# org.apache.kafka.common.errors.SslAuthenticationException: Failed to process post-handshake messages
+# Caused by: javax.net.ssl.SSLHandshakeException: Received fatal alert: bad_certificate
+
+./kafka-console-consumer.sh --bootstrap-server kafka:9093 \
+  --topic tls-test --from-beginning \
+  --consumer.config /bitnami/kafka/config/client-mutual-tls.properties
+
+###
+### LAB Using Client Authentication with Kafka
+###
+# Your supermarket company is using Kafka as part of its backend data infrastructure. 
+# The cluster has already been secured with TLS on a secure port, 
+# but currently, any client using that secure port has full access to everything in the cluster.
+
+# You have been asked to implement client authentication using client certificates. 
+# The purpose of this task is so that only clients with client certificates 
+#   signed by the cluster's certificate authority can use the secure port.
+
+# To complete this task, you will need the following information:
+
+# The certificate authority files you need in order to sign the client certificate 
+#   (ca-cert and ca-key) can be found in /home/cloud_user/certs.
+
+# The password for the ca-key is AllTheKeys.
+
+# There is a client configuration file located at /home/cloud_user/client-ssl.properties.
+
+# There is a topic called inventory_purchases with a few test records. You can consume from this topic in order to test your configuration like so:
+
+# kafka-console-consumer --bootstrap-server zoo1:9093 --topic inventory_purchases \
+#   --from-beginning --consumer.config client-ssl.properties
+# If you get stuck, feel free to check out the solution video, or the detailed instructions under each objective. Good luck!
+
+#######
+# mkdir -p security/certs && cd security/certs
+
+# openssl req -new -x509 -keyout ca-key -out ca-cert -days 365 \
+#   -subj "/C=US/ST=Texas/L=Keller/O=Linux Academy/OU=Content/CN=CCDAK"
+
+# keytool -keystore client.keystore.jks -alias kafkauser -validity 365 -genkey \
+#   -keyalg RSA -dname "CN=kafkauser, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown"
+
+# keytool -keystore client.keystore.jks -alias kafkauser -certreq -file client-cert-file
+
+# openssl x509 -req -CA ca-cert -CAkey ca-key -in client-cert-file -out client-cert-signed -days 365 -CAcreateserial
+
+# keytool -keystore client.keystore.jks -alias CARoot -import -file ca-cert
+
+# keytool -keystore client.keystore.jks -alias kafkauser -import -file client-cert-signed
+
+# Generate Your Client Certificate Files
+# Generate a client certificate. Choose a password for the client keystore when prompted:
+# cd ~/certs/
+
+# keytool -keystore client.keystore.jks -alias kafkauser -validity 365 -genkey -keyalg RSA -dname "CN=kafkauser, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown"
+# When prompted, enter the keystore password that was set.
+# When prompted, re-enter the keystore password.
+# When prompted with RETURN if same as keystore password, just hit enter again to make it the same password as the keystore.
+# Sign the key:
+# keytool -keystore client.keystore.jks -alias kafkauser -certreq -file client-cert-file
+# When prompted, enter the keystore password.
+
+# Sign the certificate:
+
+# openssl x509 -req -CA ca-cert -CAkey ca-key -in client-cert-file -out client-cert-signed -days 365 -CAcreateserial
+
+# 1. When prompted for the `ca-key` passphrase, use  `AllTheKeys`.
+# 1. Import the public certificate:
+
+# keytool -keystore client.keystore.jks -alias CARoot -import -file ca-cert
+
+# 1. When prompted, enter the `keystore password`.
+# 1. Type `yes` to accept the certificate.
+# 1. Import the signed certificate:
+
+# keytool -keystore client.keystore.jks -alias kafkauser -import -file client-cert-signed
+
+# 1. When prompted, enter the `keystore password`.
+# 1. Move the client keystore into an appropriate location:
+
+# sudo cp client.keystore.jks /var/private/ssl/
+
+# 1. When prompted, enter the `cloud_user` password.
+# 1. Ensure that the file is owned by `root` with:
+
+# sudo chown root:root /var/private/ssl/client.keystore.jks
+
+
+# ### Enable Client Authentication for the Broker
+
+# 1. Set client authentication to `required` in `server.properties`:
+
+# sudo vi /etc/kafka/server.properties
+
+
+# 1. Locate the line that begins with `ssl.client.auth` and change it:
+
+# ssl.client.auth=required
+
+# 1. Save the changes to the file.
+# 1. Restart Kafka and then verify that everything is working:
+
+# sudo systemctl restart confluent-kafka
+
+# sudo systemctl status confluent-kafka
+
+
+# ### Add Client Authentication Settings to Your Client Config File
+
+# 1. Edit `client-ssl.properties`:
+
+# cd ~/
+
+# vi client-ssl.properties
+
+
+# 1. Add the following lines:
+
+# ssl.keystore.location=/var/private/ssl/client.keystore.jks ssl.keystore.password=<your client keystore password> ssl.key.password=<your client key password>
+
+
+# 1. Create a console consumer using client authentication to make verify that everything is working:
+
+# kafka-console-consumer --bootstrap-server zoo1:9093 --topic inventory_purchases --from-beginning --consumer.config client-ssl.properties
+
+########
+
+docker run --rm -it --network kafka-network \
+  -v $PWD/security/certs/client.keystore.jks:/bitnami/kafka/config/certs/client.keystore.jks \
+  -v $PWD/security/truststore/kafka.truststore.jks:/bitnami/kafka/config/certs/kafka.truststore.jks \
+  -v $PWD/security/config/client-mutual-tls.properties:/bitnami/kafka/config/client-mutual-tls.properties \
+  bitnami/kafka:3.3 bash
+
+./kafka-topics.sh --bootstrap-server kafka:9092 --create \
+  --topic tls-test --partitions 1 --replication-factor 1
+
+./kafka-console-producer.sh --bootstrap-server kafka:9092 --topic tls-test
+
+./kafka-console-consumer.sh --bootstrap-server kafka:9092 \
+  --topic tls-test --from-beginning
+
+./kafka-console-consumer.sh --bootstrap-server kafka:9093 \
+  --topic tls-test --from-beginning \
+  --consumer.config /bitnami/kafka/config/client-mutual-tls.properties
+
+###
+### LAB Kafka Authorization Using ACLs
+###
