@@ -984,3 +984,35 @@ docker run --rm -it --network kafka-network \
 ###
 ### LAB Kafka Authorization Using ACLs
 ###
+# Your supermarket company is using client authentication and ACLs in order to manage access to a Kafka cluster. 
+# They have ACLs configured for some existing topics but due to new requirements, some changes need to be made 
+#   in order to allow access for a new client user called kafkauser. Note that allow.everyone.if.no.acl.found is set to true for this cluster.
+
+# Implement the following authorization changes to the cluster:
+
+# Provide kafkauser with read and write access to the inventory_purchases topic
+# Remove all existing ACLs for the member_signups topic to allow access to all users, including kafkauser
+# There is a client configuration file on the server located at /home/cloud_user/client-ssl.properties. This configuration will allow you to authenticate as kafkauser.
+
+# If you get stuck, feel free to check out the solution video, or the detailed instructions under each objective. Good luck!
+
+# Create the ACL.
+# kafka-acls --authorizer-properties zookeeper.connect=localhost:2181 --add --allow-principal User:kafkauser --operation read --operation write --topic inventory_purchases
+# Verify that the read access works by consuming from the topic.
+# kafka-console-consumer --bootstrap-server zoo1:9093 --topic inventory_purchases --from-beginning --consumer.config client-ssl.properties
+# Data from that topic should be displayed. Pressing Ctrl+C will stop the command so that we can continue.
+
+# Verify that the write access works by writing data to the topic.
+# kafka-console-producer --broker-list zoo1:9093 --topic inventory_purchases --producer.config client-ssl.properties
+# After running this command, provide some sample data such as "test data" or "another test" and press Enter. If no errors are displayed, the write was successful. Press Ctrl+C to stop the command to continue.
+
+# Remove All Existing ACLs for the member_signups Topic
+# List the ACLs for the topic.
+# kafka-acls --authorizer-properties zookeeper.connect=localhost:2181 --topic member_signups --list
+# Remove the existing ACL for the topic.
+# kafka-acls --authorizer-properties zookeeper.connect=localhost:2181 --topic member_signups --remove
+# At the prompt, enter y to confirm the removal.
+
+# Verify that you can read from the topic as kafkauser.
+# kafka-console-consumer --bootstrap-server zoo1:9093 --topic member_signups --from-beginning --consumer.config client-ssl.properties
+# Data from the topic should be displayed.
