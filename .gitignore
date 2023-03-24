@@ -6,6 +6,9 @@
 *-demo-data
 debezium-connector-postgres
 file-sink
+ccdak/security/certs
+ccdak/security/keystore
+ccdak/security/truststore
 
 ## sam
 .aws-sam*
