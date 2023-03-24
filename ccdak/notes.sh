@@ -752,3 +752,64 @@ curl -X POST http://localhost:8083/connectors \
 curl http://localhost:8083/connectors/inventory_source_connector
 
 curl http://localhost:8083/connectors/inventory_source_connector/status
+
+####
+#### chapter 11
+####
+Apache Kafka Security (SSL SASL Kerberos ACL)
+- https://www.youtube.com/playlist?list=PLt1SIbA8guusMatdciotF-WyG4IMBT1EG
+Encryption (SSL)
+Authentication (SSL & SASL)
+Authorisation (ACL)
+
+#### TLS Encryption
+TLS (Transport Layer Security) Encryption
+TLS prevents man-in-the-middle (MITM) attacks, plus ensures that communication between clients and Kafka servers is encrypted.
+If you plan to have external clients (eg producers and consumers) connect to Kafka, it may be a good idea to confirm that they use TLS to do so.
+
+To set up TLS, we will need to:
+* create a certificate authority
+* create signed certificates for our Kafka brokers
+* configure brokers to enable TLS and use the certificates
+* configure a client to connect securely and trust the certificates
+
+* country (countryName, C)
+* state or province name (stateOrProvinceName, ST)
+* locality (locality, L)
+* organization (organizationName, O)
+* organizational unit (organizationalUnitName, OU)
+* common name (commonName, CN)
+
+cd security
+bash kafka-generate-ssl-automatic.sh
+# security
+# ├── config
+# │   └── client-ssl.properties
+# ├── kafka-generate-ssl-automatic.sh
+# ├── kafka-hosts.txt
+# ├── keystore
+# │   └── kafka.server.keystore.jks
+# └── truststore
+#     ├── ca-key
+#     └── kafka.truststore.jks
+
+# PLAINTEXT at 9092 and SSL at 9093
+docker-compose -f compose-kafka-tls.yml up -d
+
+docker run --rm -it --network kafka-network \
+  -v $PWD/security/keystore/kafka.server.keystore.jks:/bitnami/kafka/config/certs/kafka.keystore.jks \
+  -v $PWD/security/truststore/kafka.truststore.jks:/bitnami/kafka/config/certs/kafka.truststore.jks \
+  -v $PWD/security/config/client-ssl.properties:/bitnami/kafka/config/client-ssl.properties \
+  bitnami/kafka:3.3 bash
+
+./kafka-topics.sh --bootstrap-server kafka:9092 --create \
+  --topic tls-test --partitions 1 --replication-factor 1
+
+./kafka-console-producer.sh --bootstrap-server kafka:9092 --topic tls-test
+
+./kafka-console-consumer.sh --bootstrap-server kafka:9092 \
+  --topic tls-test --from-beginning
+
+./kafka-console-consumer.sh --bootstrap-server kafka:9093 \
+  --topic tls-test --from-beginning \
+  --consumer.config /bitnami/kafka/config/client-ssl.properties
