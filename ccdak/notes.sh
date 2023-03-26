@@ -1016,3 +1016,60 @@ docker run --rm -it --network kafka-network \
 # Verify that you can read from the topic as kafkauser.
 # kafka-console-consumer --bootstrap-server zoo1:9093 --topic member_signups --from-beginning --consumer.config client-ssl.properties
 # Data from the topic should be displayed.
+
+####
+#### chapter 12
+####
+
+#### LAB Writing Tests for a Kafka Producer
+# Your supermarket company is using Kafka to manage some of their back-end data infrastructure. 
+# They have created a membership program for customers, and a Kafka producer publishes a message to Kafka every time a new member signs up for the program.
+
+# Unfortunately, the developer who wrote the producer code had to go on sick leave before they could write unit tests for the code. 
+# Your task is to create some unit tests for the producer class.
+
+# There is a project in GitHub that contains the code. Clone this project to the Dev server. 
+# The producer class is located at src/main/java/com/linuxacademy/ccdak/producer/MemberSignupsProducer.java. You can find a test class at src/test/java/com/linuxacademy/ccdak/producer/MemberSignupsProducerTest.java. Edit the test class and implement your unit tests there. There are already test methods and some test fixtures set up in the class.
+
+# Luckily, the developer left behind some notes on the unit tests that need to be created.
+
+# testHandleMemberSignup_sent_data — Call the handleMemberSignup method and test that the correct data is sent by the producer (both key and value).
+# testHandleMemberSignup_partitioning — The producer implements custom partitioning. Records where the value starts with the letters A–M are sent to partition 0, and the rest are sent to partition 1. Call handleMemberSignup twice — once with a value that starts with A–M and once with a value that starts with N–Z. Test that the partitions were set appropriately for these records.
+# testHandleMemberSignup_output — The producer implements a callback that prints the key and value of the record to System.out once the record is acknowledged. Test that the correct data is printed to System.out by the callback. A test fixture has already been set up that will allow you access data printed to System.out during the test like so: systemOutContent.toString().
+# testHandleMemberSignup_error — The producer implements a callback that prints the error message to System.err when there is an error. Make the producer return an error and test that the correct data is printed to System.err by the callback. A test fixture has already been set up that will allow you access data printed to System.err during the test like so: systemErrContent.toString().
+
+#### LAB Writing Tests for a Kafka Consumer
+# Your supermarket company has a consumer that consumes messages that are created when customers sign up for a membership program. 
+# This consumer simply logs the messages and their metadata to the console.
+
+# The company is reviewing the codebase for compliance with good practices, and this consumer has no unit tests. 
+# Your task is to write some unit tests for the consumer.
+
+# There is a project in GitHub that contains the code. Clone this project to the Dev server. 
+# The consumer class is located at src/main/java/com/linuxacademy/ccdak/consumer/MemberSignupsConsumer.java. You can find a test class at src/test/java/com/linuxacademy/ccdak/consumer/MemberSignupsConsumerTest.java. Edit the test class and implement your unit tests there. There are already test methods and some test fixtures set up in the class.
+
+# Note the test class contains a test fixture called systemOutContent. You can use this to access data written to System.out during the test like so:
+
+# systemOutContent.toString()
+# Here are some notes on the tests that need to be created:
+
+# testHandleRecords_output — This test should simply verify the output. Call the handleRecords and pass in a record. Test that the data is written to System.out in the expected format.
+# testHandleRecords_none — Test that handleRecords works as expected when the collection of records is empty.
+# testHandleRecords_multiple — Test that handleRecords works as expected when the collection of records contains more than one record.
+
+#### Writing Tests for a Kafka Streams Application
+# Your supermarket company has a Kafka Streams application that processes messages that are created when customers sign up for a membership program. 
+# The application reads these incoming messages and produces data to an output topic that is used to send customers an email with information about their new membership account. 
+# This output topic is keyed to the member ID, and the record values are the customer's first name, formatted properly for the mailing.
+
+# The company is reviewing the codebase for compliance with good practices, and this Streams application has no unit tests. 
+# Your task is to write some unit tests for the application.
+
+# There is a project in GitHub that contains the code. Clone this project to the Dev server. 
+# The consumer class is located at src/main/java/com/linuxacademy/ccdak/streams/MemberSignupsStream.java. You can find a test class at src/test/java/com/linuxacademy/ccdak/streams/MemberSignupsStreamTest.java. Edit the test class and implement your unit tests there. There are already test methods and some test fixtures set up in the class.
+
+# Here are some notes on the features of the application and the tests that need to be created:
+
+# test_first_name — The stream takes records which usually have customer names in the form LastName, FirstName. The stream parses the value in order to extract only the first name for the mailing. Test this functionality by producing a record with a value in the LastName, FirstName format and verifying that the output record has only the first name as its value.
+# test_unknown_name_filter — Some legacy systems are still producing records to the input topic with a value of UNKNOWN when the customer name is unknown. For now, we won't send these customers an email, so the stream filters these records out. Produce a record with a value of UNKNOWN and verify that there is no corresponding output record.
+# test_empty_name_filter — There are also some input systems that produce records to the input topic with an empty string as the value when the customer name is unknown. The streams application also filters out these records. Produce a record with an empty value and verify that there is no corresponding output record.
