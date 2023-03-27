@@ -1179,3 +1179,124 @@ SELECT * FROM ksql_test_table;
 # The `KSQL_TEST_TABLE` table isn't queryable. To derive a queryable table, you can do 'CREATE TABLE QUERYABLE_KSQL_TEST_TABLE AS SELECT * FROM KSQL_TEST_TABLE'. See https://cnfl.io/queries for more info.
 # Add EMIT CHANGES if you intended to issue a push query.
 # Statement: SELECT * FROM ksql_test_table;
+
+#### LAB Working with KSQL Streams
+# Your supermarket company has a customer membership program, and they are using Kafka to manage some of the back-end data related to this program. 
+# A topic called member_signups contains records that are published when a new customer signs up for the program. 
+# Each record contains some data indicating whether or not the customer has agreed to receive email notifications.
+
+# The email notification system reads from a Kafka topic, so a topic called member_signups_email needs to be created that contains the new member data, 
+# but only for members who have agreed to receive notifications. 
+# The company would like to have this data automatically processed in real-time so that consumer applications can appropriately respond when a customer signs up. 
+# Luckily, this use case can be accomplished using KSQL persistent streaming queries, so you do not need to write a Kafka Streams application.
+
+# The data in member_signups is formatted with the key as the member ID. 
+# The value is a comma-delimited list of fields in the form <last name>,<first name>,<email notifications true/false>.
+
+# Create a stream that pulls the data from member_signups, and then create a persistent streaming query to filter out records where the email notification value is false 
+# and output the result to the member_signups_email topic.
+./kafka-topics.sh --bootstrap-server localhost:9092 --create \
+  --topic member_signups --partitions 1 --replication-factor 1
+
+./kafka-console-producer.sh --bootstrap-server localhost:9092 \
+  --topic member_signups --property parse.key=true --property key.separator=:
+1:doe,john,true
+2:doe,jane,false
+3:smith,john,true
+
+./kafka-console-consumer.sh --bootstrap-server localhost:9092 \
+  --topic member_signups --from-beginning --property print.key=true
+
+docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
+
+SET 'auto.offset.reset' = 'earliest';
+SHOW TOPICS;
+PRINT 'member_signups';
+# Key format: JSON or KAFKA_STRING
+# Value format: KAFKA_STRING
+# rowtime: 2023/03/27 17:22:00.772 Z, key: 1, value: doe,john,true, partition: 0
+# rowtime: 2023/03/27 17:22:05.008 Z, key: 2, value: doe,jane,false, partition: 0
+# rowtime: 2023/03/27 17:22:09.032 Z, key: 3, value: smith,john,true, partition: 0
+# Topic printing ceased
+CREATE STREAM member_signups (
+  last_name VARCHAR, 
+  first_name VARCHAR,
+  email_notification BOOLEAN
+) WITH (
+  kafka_topic='member_signups', value_format='DELIMITED'
+);
+SELECT * FROM member_signups;
+
+CREATE STREAM member_signups_email AS
+  SELECT * FROM member_signups WHERE email_notification = true;
+SELECT * FROM member_signups_email;
+
+#### LAB Joining Datasets with KSQL
+# Your supermarket company has a customer membership program. Some of the data for this program is managed using Kafka. 
+
+# There are currently two relevant topics:
+# * member_signups — Key: member ID, value: Customer name.
+# * member_contact — Key: member ID, value: Customer email address.
+
+# The company would like to send an email to new members when they join. 
+# This email needs to contain the customer's name, and it needs to be sent to the customer's email address, 
+#   but these pieces of data are currently in two different topics. 
+
+# Using KSQL, create a persistent streaming query to join the customer names and email addresses, 
+#   and stream the result to an output topic called MEMBER_EMAIL_LIST.
+
+./kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic member_signups
+./kafka-topics.sh --bootstrap-server localhost:9092 --create \
+  --topic member_signups --partitions 1 --replication-factor 1
+./kafka-console-producer.sh --bootstrap-server localhost:9092 \
+  --topic member_signups --property parse.key=true --property key.separator=:
+1:john doe
+2:jane doe
+3:john smith
+./kafka-console-consumer.sh --bootstrap-server localhost:9092 \
+  --topic member_signups --from-beginning --property print.key=true
+
+./kafka-topics.sh --bootstrap-server localhost:9092 --create \
+  --topic member_contact --partitions 1 --replication-factor 1
+./kafka-console-producer.sh --bootstrap-server localhost:9092 \
+  --topic member_contact --property parse.key=true --property key.separator=:
+1:john@doe
+2:jane@doe
+3:john@smith
+./kafka-console-consumer.sh --bootstrap-server localhost:9092 \
+  --topic member_contact --from-beginning --property print.key=true
+
+SET 'auto.offset.reset' = 'earliest';
+SHOW TOPICS;
+PRINT 'member_signups';
+PRINT 'member_contact';
+DROP STREAM IF EXISTS member_signups_email;
+DROP STREAM IF EXISTS member_signups;
+CREATE STREAM member_signups (
+  rowkey VARCHAR KEY,
+  name VARCHAR
+) WITH (
+  kafka_topic='member_signups', value_format='DELIMITED'
+);
+PRINT 'member_signups' FROM BEGINNING;
+SELECT * FROM member_signups;
+
+DROP STREAM IF EXISTS member_contact;
+CREATE STREAM member_contact (
+  rowkey VARCHAR KEY,
+  email VARCHAR
+) WITH (
+  kafka_topic='member_contact', value_format='DELIMITED'
+);
+PRINT 'member_contact' FROM BEGINNING;
+SELECT * FROM member_contact;
+
+CREATE STREAM member_email_list AS
+  SELECT member_signups.rowkey, member_signups.name, member_contact.email
+  FROM member_signups
+  INNER JOIN member_contact WITHIN 365 DAYS ON member_signups.rowkey = member_contact.rowkey
+  EMIT CHANGES;
+# WARNING: DEPRECATION NOTICE: Stream-stream joins statements without a GRACE PERIOD will not be accepted in a future ksqlDB version.
+# Please use the GRACE PERIOD clause as specified in https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/select-push-query/
+PRINT 'MEMBER_EMAIL_LIST' FROM BEGINNING;
+SELECT * FROM member_email_list;
