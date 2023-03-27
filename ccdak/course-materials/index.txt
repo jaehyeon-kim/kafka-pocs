@@ -1,0 +1,14 @@
+CHAPTER 1 Getting Started
+CHAPTER 2 Building a Practice Cluster
+CHAPTER 3 Kafka Architecture Basics
+CHAPTER 4 Kafka and Java
+CHAPTER 5 Kafka Streams
+CHAPTER 6 Advanced Application Design Concepts
+CHAPTER 7 Working with Kafka in Java
+CHAPTER 8 Working with the Confluent Kafka REST APIs
+CHAPTER 9 Confluent Schema Registry
+CHAPTER 10 Kafka Connect
+CHAPTER 11 Kafka Security
+CHAPTER 12 Testing
+CHAPTER 13 Working with Clients
+CHAPTER 14 Confluent KSQL
