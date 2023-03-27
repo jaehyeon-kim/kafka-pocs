@@ -1057,7 +1057,7 @@ docker run --rm -it --network kafka-network \
 # testHandleRecords_none — Test that handleRecords works as expected when the collection of records is empty.
 # testHandleRecords_multiple — Test that handleRecords works as expected when the collection of records contains more than one record.
 
-#### Writing Tests for a Kafka Streams Application
+#### LAB Writing Tests for a Kafka Streams Application
 # Your supermarket company has a Kafka Streams application that processes messages that are created when customers sign up for a membership program. 
 # The application reads these incoming messages and produces data to an output topic that is used to send customers an email with information about their new membership account. 
 # This output topic is keyed to the member ID, and the record values are the customer's first name, formatted properly for the mailing.
@@ -1073,3 +1073,109 @@ docker run --rm -it --network kafka-network \
 # test_first_name — The stream takes records which usually have customer names in the form LastName, FirstName. The stream parses the value in order to extract only the first name for the mailing. Test this functionality by producing a record with a value in the LastName, FirstName format and verifying that the output record has only the first name as its value.
 # test_unknown_name_filter — Some legacy systems are still producing records to the input topic with a value of UNKNOWN when the customer name is unknown. For now, we won't send these customers an email, so the stream filters these records out. Produce a record with a value of UNKNOWN and verify that there is no corresponding output record.
 # test_empty_name_filter — There are also some input systems that produce records to the input topic with an empty string as the value when the customer name is unknown. The streams application also filters out these records. Produce a record with an empty value and verify that there is no corresponding output record.
+
+####
+#### chapter 13
+####
+
+#### LAB Tuning a Kafka Producer
+# Your supermarket company has a producer that publishes messages to a topic called member_signups. 
+# After running this producer for a while in production, three issues have arisen that require some adjustments to the producer configuration. 
+# You have been asked to make some changes to the producer configuration code to address these issues.
+
+# The source code can be found on GitHub. Clone this project to the broker. 
+# You should be able to implement all the necessary changes in the file src/main/java/com/linuxacademy/ccdak/producer/MemberSignupsProducer.java inside the project.
+
+# Make configuration changes to address the following issues:
+
+# Recently, a Kafka broker failed and had to be restarted. Unfortunately, that broker was the leader for a partition of the member_signups topic at the time, 
+# and a few records had been committed by the leader but had not yet been written to the replicas. 
+# A small number of records were lost when the leader failed. Change the configuration so that this does not happen again.
+# The producer is configured to retry the process of sending a record when it fails due to a transient error. 
+# However, in a few instances this has caused records to be written to the topic log in a different order than the order they were sent by the producer, 
+# because a record was retried while another record was sent ahead of it. 
+# A few downstream consumers depend on certain ordering guarantees for this data. 
+# Ensure that retries by the producer do not result in out-of-order records.
+# This producer sometimes experiences high throughput that could benefit from a greater degree of message batching. Increase the batch size to 64 KB (65536 bytes).
+
+#### LAB Tuning a Kafka Consumer
+# Your supermarket company has a consumer that logs data from the member_signups topic to System.out. 
+# This consumer acts as a utility to log the data for later auditing. 
+# However, there is a series of issues with this consumer that can be addressed through some minor alterations to its configuration. 
+# Examine the list of issues below and resolve them by implementing the necessary configuration changes in the consumer code.
+
+# You can find the consumer code on GitHub. Clone this project to the broker server. 
+# You can implement your configuration changes in the consumer class at src/main/java/com/linuxacademy/ccdak/consumer/MemberSignupsConsumer.java inside the project.
+
+# Make configuration changes to address the following issues:
+
+# This consumer does not have a high need for real-time data since it is merely a logging utility that provides data for later analysis. 
+# Increase the minimum fetch size to 1 K (1024 bytes) to allow the consumer to fetch more data in a single request.
+
+# Changes in consumer status (such as consumers joining or leaving the group) are not being detected quickly enough. 
+# Configure the consumer to send a heartbeat every two seconds (2000ms).
+
+# Last week, someone tried to run this consumer against a new cluster. The consumer failed with the following error message:
+
+# Exception in thread "main" org.apache.kafka.clients.consumer.NoOffsetForPartitionException: Undefined offset with no reset policy for partitions: [member_signups-0]
+# Ensure the consumer has an offset reset policy that will allow the consumer to read from the beginning of the log when reading from a partition for the first time.
+
+####
+#### chapter 14
+####
+./kafka-topics.sh --bootstrap-server localhost:9092 --create \
+  --topic ksql-test --partitions 1 --replication-factor 1
+
+./kafka-console-producer.sh --bootstrap-server localhost:9092 \
+  --topic ksql-test --property parse.key=true --property key.separator=:
+5:5,sarah,2
+7:7,andy,1
+5:5,sarah,3
+
+./kafka-console-consumer.sh --bootstrap-server localhost:9092 \
+  --topic ksql-test --from-beginning --property print.key=true
+
+docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
+
+--//
+SET 'auto.offset.reset' = 'earliest';
+SHOW TOPICS;
+PRINT 'ksql-test';
+CREATE STREAM ksql_test_stream (
+  employee_id INTEGER, 
+  name VARCHAR,
+  vacation_days INTEGER
+) WITH (
+  kafka_topic='ksql-test', value_format='DELIMITED'
+);
+SELECT * FROM ksql_test_stream;
+# +----------------------------------------------------------+----------------------------------------------------------+----------------------------------------------------------+
+# |EMPLOYEE_ID                                               |NAME                                                      |VACATION_DAYS                                             |
+# +----------------------------------------------------------+----------------------------------------------------------+----------------------------------------------------------+
+# |5                                                         |sarah                                                     |2                                                         |
+# |7                                                         |andy                                                      |1                                                         |
+# |5                                                         |sarah                                                     |3                                                         |
+# Query Completed
+# Query terminated
+SELECT SUM(vacation_days) FROM ksql_test_stream GROUP BY employee_id EMIT CHANGES;
+# +----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+# |KSQL_COL_0                                                                                                                                                                        |
+# +----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+# |2                                                                                                                                                                                 |
+# |1                                                                                                                                                                                 |
+# |5                                                                                                                                                                                 |
+
+CREATE TABLE ksql_test_table (
+  employee_id INTEGER PRIMARY KEY, 
+  name VARCHAR,
+  vacation_days INTEGER
+) WITH (
+  kafka_topic='ksql-test', value_format='DELIMITED'
+);
+# Tables have PRIMARY KEYs, which are unique and NON NULL.
+# Streams have KEYs, which have no uniqueness or NON NULL constraints.
+
+SELECT * FROM ksql_test_table;
+# The `KSQL_TEST_TABLE` table isn't queryable. To derive a queryable table, you can do 'CREATE TABLE QUERYABLE_KSQL_TEST_TABLE AS SELECT * FROM KSQL_TEST_TABLE'. See https://cnfl.io/queries for more info.
+# Add EMIT CHANGES if you intended to issue a push query.
+# Statement: SELECT * FROM ksql_test_table;
