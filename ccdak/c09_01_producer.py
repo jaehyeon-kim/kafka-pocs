@@ -46,6 +46,7 @@ class Producer:
 
         for person in persons:
             data = person.asdict()
+            print(data)
             self.producer.send(self.topic_name, key=str(data["id"]), value=(data, schema))
         self.producer.flush()
 

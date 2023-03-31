@@ -53,125 +53,155 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "broker:29092"
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
-  connect:
-    image: cnfldemos/cp-server-connect-datagen:0.6.0-7.3.0
-    hostname: connect
-    container_name: connect
-    depends_on:
-      - broker
-      - schema-registry
+  kafka-ui-glue:
+    image: provectuslabs/kafka-ui:master
+    container_name: kafka-ui-glue
     ports:
-      - "8083:8083"
+      - "8080:8080"
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: "broker:29092"
-      CONNECT_REST_ADVERTISED_HOST_NAME: connect
-      CONNECT_GROUP_ID: compose-connect-group
-      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
-      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
-      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
-      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
-      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
-      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
-      # CLASSPATH required due to CC-2422
-      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-7.3.0.jar
-      CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
-      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
-      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
-      CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
+      # LOGGING_LEVEL_ROOT: debug
+      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+      AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN
+      KAFKA.clusters.0.name: local
+      KAFKA.clusters.0.bootstrapServers: broker:29092
+      kafka.clusters.0.serde.0.name: GlueSchemaRegistry
+      kafka.clusters.0.serde.0.filePath: /glue-serde/kafkaui-glue-serde-1.0-SNAPSHOT-jar-with-dependencies.jar
+      kafka.clusters.0.serde.0.className: com.provectus.kafka.ui.serdes.glue.GlueSerde
+      kafka.clusters.0.serde.0.properties.region: $AWS_DEFAULT_REGION #required
+      kafka.clusters.0.serde.0.properties.registry: ccdak #required, name of Glue Schema Registry
+      # template that will be used to find schema name for topic key. Optional, default is null (not set).
+      kafka.clusters.0.serde.0.properties.keySchemaNameTemplate: "%s-key"
+      # template that will be used to find schema name for topic value. Optional, default is  '%s'
+      kafka.clusters.0.serde.0.properties.valueSchemaNameTemplate: "%s-value"
+      # # schema name -> topics pattern where it will be used for keys. Optional.
+      # kafka.clusters.0.serde.0.properties.topicKeysSchemas.some-topic-key: "some-topic1|some-topic2"
+      # # schema name -> topics pattern where it will be used for values. Optional.
+      # kafka.clusters.0.serde.0.properties.topicValuesSchemas.some-topic-value: "some-topic1|some-topic2"
+      # kafka.clusters.0.serde.0.properties.topicValuesSchemas.another-topic-val: "another-topic-value"
 
-  # control-center:
-  #   image: confluentinc/cp-enterprise-control-center:7.3.0
-  #   hostname: control-center
-  #   container_name: control-center
+    volumes:
+      - ../misc:/glue-serde
+
+  # connect:
+  #   image: cnfldemos/cp-server-connect-datagen:0.6.0-7.3.0
+  #   hostname: connect
+  #   container_name: connect
   #   depends_on:
   #     - broker
   #     - schema-registry
-  #     - connect
-  #     - ksqldb-server
   #   ports:
-  #     - "9021:9021"
+  #     - "8083:8083"
   #   environment:
-  #     CONTROL_CENTER_BOOTSTRAP_SERVERS: "broker:29092"
-  #     CONTROL_CENTER_CONNECT_CONNECT-DEFAULT_CLUSTER: "connect:8083"
-  #     CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8088"
-  #     CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://localhost:8088"
-  #     CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
-  #     CONTROL_CENTER_REPLICATION_FACTOR: 1
-  #     CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
-  #     CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
-  #     CONFLUENT_METRICS_TOPIC_REPLICATION: 1
-  #     PORT: 9021
+  #     CONNECT_BOOTSTRAP_SERVERS: "broker:29092"
+  #     CONNECT_REST_ADVERTISED_HOST_NAME: connect
+  #     CONNECT_GROUP_ID: compose-connect-group
+  #     CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+  #     CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+  #     CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+  #     CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+  #     CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+  #     CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+  #     CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+  #     CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+  #     CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+  #     CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+  #     # CLASSPATH required due to CC-2422
+  #     CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-7.3.0.jar
+  #     CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
+  #     CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+  #     CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+  #     CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
 
-  ksqldb-server:
-    image: confluentinc/cp-ksqldb-server:7.3.0
-    hostname: ksqldb-server
-    container_name: ksqldb-server
-    depends_on:
-      - broker
-      - connect
-    ports:
-      - "8088:8088"
-    environment:
-      KSQL_CONFIG_DIR: "/etc/ksql"
-      KSQL_BOOTSTRAP_SERVERS: "broker:29092"
-      KSQL_HOST_NAME: ksqldb-server
-      KSQL_LISTENERS: "http://0.0.0.0:8088"
-      KSQL_CACHE_MAX_BYTES_BUFFERING: 0
-      KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
-      KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
-      KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
-      KSQL_KSQL_CONNECT_URL: "http://connect:8083"
-      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
-      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
-      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+  # # control-center:
+  # #   image: confluentinc/cp-enterprise-control-center:7.3.0
+  # #   hostname: control-center
+  # #   container_name: control-center
+  # #   depends_on:
+  # #     - broker
+  # #     - schema-registry
+  # #     - connect
+  # #     - ksqldb-server
+  # #   ports:
+  # #     - "9021:9021"
+  # #   environment:
+  # #     CONTROL_CENTER_BOOTSTRAP_SERVERS: "broker:29092"
+  # #     CONTROL_CENTER_CONNECT_CONNECT-DEFAULT_CLUSTER: "connect:8083"
+  # #     CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8088"
+  # #     CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://localhost:8088"
+  # #     CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+  # #     CONTROL_CENTER_REPLICATION_FACTOR: 1
+  # #     CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+  # #     CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+  # #     CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+  # #     PORT: 9021
 
-  ksqldb-cli:
-    image: confluentinc/cp-ksqldb-cli:7.3.0
-    container_name: ksqldb-cli
-    depends_on:
-      - broker
-      - connect
-      - ksqldb-server
-    entrypoint: /bin/sh
-    tty: true
-
-  # ksql-datagen:
-  #   image: confluentinc/ksqldb-examples:7.3.0
-  #   hostname: ksql-datagen
-  #   container_name: ksql-datagen
+  # ksqldb-server:
+  #   image: confluentinc/cp-ksqldb-server:7.3.0
+  #   hostname: ksqldb-server
+  #   container_name: ksqldb-server
   #   depends_on:
-  #     - ksqldb-server
   #     - broker
-  #     - schema-registry
   #     - connect
-  #   command: "bash -c 'echo Waiting for Kafka to be ready... && \
-  #     cub kafka-ready -b broker:29092 1 40 && \
-  #     echo Waiting for Confluent Schema Registry to be ready... && \
-  #     cub sr-ready schema-registry 8081 40 && \
-  #     echo Waiting a few seconds for topic creation to finish... && \
-  #     sleep 11 && \
-  #     tail -f /dev/null'"
+  #   ports:
+  #     - "8088:8088"
   #   environment:
   #     KSQL_CONFIG_DIR: "/etc/ksql"
-  #     STREAMS_BOOTSTRAP_SERVERS: broker:29092
-  #     STREAMS_SCHEMA_REGISTRY_HOST: schema-registry
-  #     STREAMS_SCHEMA_REGISTRY_PORT: 8081
+  #     KSQL_BOOTSTRAP_SERVERS: "broker:29092"
+  #     KSQL_HOST_NAME: ksqldb-server
+  #     KSQL_LISTENERS: "http://0.0.0.0:8088"
+  #     KSQL_CACHE_MAX_BYTES_BUFFERING: 0
+  #     KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+  #     KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
+  #     KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+  #     KSQL_KSQL_CONNECT_URL: "http://connect:8083"
+  #     KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
+  #     KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+  #     KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
 
-  rest-proxy:
-    image: confluentinc/cp-kafka-rest:7.3.0
-    depends_on:
-      - broker
-      - schema-registry
-    ports:
-      - 8082:8082
-    hostname: rest-proxy
-    container_name: rest-proxy
-    environment:
-      KAFKA_REST_HOST_NAME: rest-proxy
-      KAFKA_REST_BOOTSTRAP_SERVERS: "broker:29092"
-      KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
-      KAFKA_REST_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+  # ksqldb-cli:
+  #   image: confluentinc/cp-ksqldb-cli:7.3.0
+  #   container_name: ksqldb-cli
+  #   depends_on:
+  #     - broker
+  #     - connect
+  #     - ksqldb-server
+  #   entrypoint: /bin/sh
+  #   tty: true
+
+  # # ksql-datagen:
+  # #   image: confluentinc/ksqldb-examples:7.3.0
+  # #   hostname: ksql-datagen
+  # #   container_name: ksql-datagen
+  # #   depends_on:
+  # #     - ksqldb-server
+  # #     - broker
+  # #     - schema-registry
+  # #     - connect
+  # #   command: "bash -c 'echo Waiting for Kafka to be ready... && \
+  # #     cub kafka-ready -b broker:29092 1 40 && \
+  # #     echo Waiting for Confluent Schema Registry to be ready... && \
+  # #     cub sr-ready schema-registry 8081 40 && \
+  # #     echo Waiting a few seconds for topic creation to finish... && \
+  # #     sleep 11 && \
+  # #     tail -f /dev/null'"
+  # #   environment:
+  # #     KSQL_CONFIG_DIR: "/etc/ksql"
+  # #     STREAMS_BOOTSTRAP_SERVERS: broker:29092
+  # #     STREAMS_SCHEMA_REGISTRY_HOST: schema-registry
+  # #     STREAMS_SCHEMA_REGISTRY_PORT: 8081
+
+  # rest-proxy:
+  #   image: confluentinc/cp-kafka-rest:7.3.0
+  #   depends_on:
+  #     - broker
+  #     - schema-registry
+  #   ports:
+  #     - 8082:8082
+  #   hostname: rest-proxy
+  #   container_name: rest-proxy
+  #   environment:
+  #     KAFKA_REST_HOST_NAME: rest-proxy
+  #     KAFKA_REST_BOOTSTRAP_SERVERS: "broker:29092"
+  #     KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
+  #     KAFKA_REST_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
