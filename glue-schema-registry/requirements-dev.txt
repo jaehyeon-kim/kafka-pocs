@@ -1,0 +1,6 @@
+-r app/producer/requirements.txt
+-r app/consumer/requirements.txt
+black
+pytest
+pytest-cov
+boto3
