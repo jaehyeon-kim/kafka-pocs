@@ -3,56 +3,111 @@ import datetime
 import string
 import json
 import time
+import typing
+import dataclasses
+import enum
+
+import boto3
+import botocore.exceptions
 from kafka import KafkaProducer
 from faker import Faker
+from dataclasses_avroschema import AvroModel
+from aws_schema_registry import SchemaRegistryClient
+from aws_schema_registry.avro import AvroSchema
+from aws_schema_registry.adapter.kafka import KafkaSerializer
 
 
-class Order:
-    def __init__(self, fake: Faker = None):
-        self.fake = fake or Faker()
+class Compatibility(enum.Enum):
+    NONE = "NONE"
+    DISABLED = "DISABLED"
+    BACKWARD = "BACKWARD"
+    BACKWARD_ALL = "BACKWARD_ALL"
+    FORWARD = "FORWARD"
+    FORWARD_ALL = "FORWARD_ALL"
+    FULL = "FULL"
+    FULL_ALL = "FULL_ALL"
 
-    def order(self):
-        rand_int = self.fake.random_int(1, 1000)
+
+class InjectCompatMixin:
+    @classmethod
+    def fetch_avro_schema_to_python(cls, compat: Compatibility = Compatibility.BACKWARD):
+        schema = cls.avro_schema_to_python()
+        schema["compatibility"] = compat.value
+        return schema
+
+    @classmethod
+    def fetch_avro_schema(cls, compat: Compatibility = Compatibility.BACKWARD):
+        schema = cls.fetch_avro_schema_to_python(compat)
+        return json.dumps(schema)
+
+
+@dataclasses.dataclass
+class OrderItem(AvroModel):
+    product_id: int
+    quantity: int
+
+
+@dataclasses.dataclass
+class Order(AvroModel, InjectCompatMixin):
+    "Online fake order item"
+    order_id: str
+    ordered_at: datetime.datetime
+    user_id: str
+    order_items: typing.List[OrderItem]
+
+    class Meta:
+        namespace = "Order V1"
+
+    def asdict(self):
+        return dataclasses.asdict(self)
+
+    @classmethod
+    def auto(cls, fake: Faker = Faker()):
+        rand_int = fake.random_int(1, 1000)
         user_id = "".join(
             [string.ascii_lowercase[int(s)] if s.isdigit() else s for s in hex(rand_int)]
         )[::-1]
-        return {
-            "order_id": self.fake.uuid4(),
-            "ordered_at": datetime.datetime.utcnow(),
-            "user_id": user_id,
-        }
-
-    def items(self):
-        return [
-            {
-                "product_id": self.fake.random_int(1, 9999),
-                "quantity": self.fake.random_int(1, 10),
-            }
-            for _ in range(self.fake.random_int(1, 4))
+        order_items = [
+            OrderItem(fake.random_int(1, 9999), fake.random_int(1, 10))
+            for _ in range(fake.random_int(1, 4))
         ]
+        return cls(fake.uuid4(), datetime.datetime.utcnow(), user_id, order_items)
 
     def create(self, num: int):
-        return [{**self.order(), **{"items": self.items()}} for _ in range(num)]
+        return [Order.auto().asdict() for _ in range(num)]
 
 
 class Producer:
-    def __init__(self, bootstrap_servers: list, topic: str):
+    def __init__(self, bootstrap_servers: list, topic: str, registry: str):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
+        self.registry = registry
+        self.glue_client = boto3.client(
+            "glue", region_name=os.getenv("AWS_DEFAULT_REGION", "ap-southeast-2")
+        )
         self.producer = self.create()
+
+    @property
+    def serializer(self):
+        client = SchemaRegistryClient(self.glue_client, registry_name=self.registry)
+        return KafkaSerializer(client)
 
     def create(self):
         return KafkaProducer(
             security_protocol="SASL_SSL",
             sasl_mechanism="AWS_MSK_IAM",
             bootstrap_servers=self.bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v, default=self.serialize).encode("utf-8"),
             key_serializer=lambda v: json.dumps(v, default=self.serialize).encode("utf-8"),
+            value_serializer=self.serializer,
         )
 
-    def send(self, orders: list):
+    def send(self, orders: typing.List[Order], schema: AvroSchema):
+        if not self.check_registry():
+            self.create_registry()
+
         for order in orders:
-            self.producer.send(self.topic, key={"order_id": order["order_id"]}, value=order)
+            data = order.asdict()
+            self.producer.send(self.topic, key={"order_id": data["order_id"]}, value=(data, schema))
         self.producer.flush()
 
     def serialize(self, obj):
@@ -62,19 +117,41 @@ class Producer:
             return str(obj)
         return obj
 
+    def check_registry(self):
+        try:
+            self.glue_client.get_registry(RegistryId={"RegistryName": self.registry_name})
+            return True
+        except botocore.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] == "EntityNotFoundException":
+                return False
+            else:
+                raise e
+
+    def create_registry(self):
+        try:
+            self.glue_client.create_registry(RegistryName=self.registry_name)
+            return True
+        except botocore.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] == "AlreadyExistsException":
+                return True
+            else:
+                raise e
+
 
 def lambda_function(event, context):
     if os.getenv("BOOTSTRAP_SERVERS", "") == "":
         return
-    fake = Faker()
     producer = Producer(
-        bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS").split(","), topic=os.getenv("TOPIC_NAME")
+        bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS").split(","),
+        topic=os.getenv("TOPIC_NAME"),
+        registry=os.getenv("REGISTRY_NAME"),
     )
     s = datetime.datetime.now()
     ttl_rec = 0
     while True:
-        orders = Order(fake).create(100)
-        producer.send(orders)
+        orders = Order.auto().create(100)
+        schema = Order.fetch_avro_schema_to_python(Compatibility.BACKWARD)
+        producer.send(orders, schema)
         ttl_rec += len(orders)
         print(f"sent {len(orders)} messages")
         elapsed_sec = (datetime.datetime.now() - s).seconds
