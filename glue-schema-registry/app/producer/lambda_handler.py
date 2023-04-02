@@ -6,6 +6,7 @@ import time
 import typing
 import dataclasses
 import enum
+import logging
 
 import boto3
 import botocore.exceptions
@@ -15,6 +16,8 @@ from dataclasses_avroschema import AvroModel
 from aws_schema_registry import SchemaRegistryClient
 from aws_schema_registry.avro import AvroSchema
 from aws_schema_registry.adapter.kafka import KafkaSerializer
+
+logging.basicConfig(level=logging.INFO)
 
 
 class Compatibility(enum.Enum):
@@ -30,14 +33,14 @@ class Compatibility(enum.Enum):
 
 class InjectCompatMixin:
     @classmethod
-    def fetch_avro_schema_to_python(cls, compat: Compatibility = Compatibility.BACKWARD):
+    def updated_avro_schema_to_python(cls, compat: Compatibility = Compatibility.BACKWARD):
         schema = cls.avro_schema_to_python()
         schema["compatibility"] = compat.value
         return schema
 
     @classmethod
-    def fetch_avro_schema(cls, compat: Compatibility = Compatibility.BACKWARD):
-        schema = cls.fetch_avro_schema_to_python(compat)
+    def updated_avro_schema(cls, compat: Compatibility = Compatibility.BACKWARD):
+        schema = cls.updated_avro_schema_to_python(compat)
         return json.dumps(schema)
 
 
@@ -74,7 +77,7 @@ class Order(AvroModel, InjectCompatMixin):
         return cls(fake.uuid4(), datetime.datetime.utcnow(), user_id, order_items)
 
     def create(self, num: int):
-        return [Order.auto().asdict() for _ in range(num)]
+        return [Order.auto() for _ in range(num)]
 
 
 class Producer:
@@ -103,6 +106,7 @@ class Producer:
 
     def send(self, orders: typing.List[Order], schema: AvroSchema):
         if not self.check_registry():
+            logging.info(f"registry not found, create {self.registry}")
             self.create_registry()
 
         for order in orders:
@@ -119,7 +123,7 @@ class Producer:
 
     def check_registry(self):
         try:
-            self.glue_client.get_registry(RegistryId={"RegistryName": self.registry_name})
+            self.glue_client.get_registry(RegistryId={"RegistryName": self.registry})
             return True
         except botocore.exceptions.ClientError as e:
             if e.response["Error"]["Code"] == "EntityNotFoundException":
@@ -129,7 +133,7 @@ class Producer:
 
     def create_registry(self):
         try:
-            self.glue_client.create_registry(RegistryName=self.registry_name)
+            self.glue_client.create_registry(RegistryName=self.registry)
             return True
         except botocore.exceptions.ClientError as e:
             if e.response["Error"]["Code"] == "AlreadyExistsException":
@@ -139,23 +143,25 @@ class Producer:
 
 
 def lambda_function(event, context):
-    if os.getenv("BOOTSTRAP_SERVERS", "") == "":
-        return
     producer = Producer(
-        bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS").split(","),
-        topic=os.getenv("TOPIC_NAME"),
-        registry=os.getenv("REGISTRY_NAME"),
+        bootstrap_servers=os.environ["BOOTSTRAP_SERVERS"].split(","),
+        topic=os.environ["TOPIC_NAME"],
+        registry=os.environ["REGISTRY_NAME"],
     )
     s = datetime.datetime.now()
     ttl_rec = 0
     while True:
         orders = Order.auto().create(100)
-        schema = Order.fetch_avro_schema_to_python(Compatibility.BACKWARD)
+        schema = AvroSchema(Order.updated_avro_schema(Compatibility.BACKWARD))
         producer.send(orders, schema)
         ttl_rec += len(orders)
-        print(f"sent {len(orders)} messages")
+        logging.info(f"sent {len(orders)} messages")
         elapsed_sec = (datetime.datetime.now() - s).seconds
         if elapsed_sec > int(os.getenv("MAX_RUN_SEC", "60")):
-            print(f"{ttl_rec} records are sent in {elapsed_sec} seconds ...")
+            logging.info(f"{ttl_rec} records are sent in {elapsed_sec} seconds ...")
             break
         time.sleep(1)
+
+
+if __name__ == "__main__":
+    lambda_function({}, {})
