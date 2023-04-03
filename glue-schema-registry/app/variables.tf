@@ -52,6 +52,17 @@ locals {
     }
   }
 
+  consumer = {
+    src_path          = "consumer"
+    function_name     = "kafka_consumer"
+    handler           = "lambda_handler.lambda_function"
+    timeout           = 90
+    memory_size       = 128
+    runtime           = "python3.8"
+    topic_name        = "orders"
+    starting_position = "TRIM_HORIZON"
+  }
+
   tags = {
     Name        = local.name
     Environment = local.environment
