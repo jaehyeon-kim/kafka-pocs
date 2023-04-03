@@ -20,7 +20,7 @@ output "private_subnet_ids" {
 
 output "security_group_id" {
   description = "Security group ID"
-  value       = data.aws_security_group.kafka_producer_lambda.id
+  value       = data.aws_security_group.kafka_app_lambda.id
 }
 
 output "bootstrap_servers" {

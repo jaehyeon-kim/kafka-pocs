@@ -46,8 +46,9 @@ locals {
     schedule_rate     = "rate(1 minute)"
     to_enable_trigger = false
     environment = {
-      topic_name  = "orders"
-      max_run_sec = 60
+      topic_name    = "orders"
+      registry_name = "customer"
+      max_run_sec   = 10
     }
   }
 

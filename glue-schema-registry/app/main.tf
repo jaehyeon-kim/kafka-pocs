@@ -42,6 +42,7 @@ module "kafka_producer_lambda" {
   environment_variables = {
     BOOTSTRAP_SERVERS = data.aws_msk_cluster.msk_data_cluster.bootstrap_brokers_sasl_iam
     TOPIC_NAME        = local.producer.environment.topic_name
+    REGISTRY_NAME     = local.producer.environment.registry_name
     MAX_RUN_SEC       = local.producer.environment.max_run_sec
   }
 

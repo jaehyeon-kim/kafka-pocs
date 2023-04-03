@@ -6,7 +6,6 @@ import time
 import typing
 import dataclasses
 import enum
-import logging
 
 import boto3
 import botocore.exceptions
@@ -16,8 +15,6 @@ from dataclasses_avroschema import AvroModel
 from aws_schema_registry import SchemaRegistryClient
 from aws_schema_registry.avro import AvroSchema
 from aws_schema_registry.adapter.kafka import KafkaSerializer
-
-logging.basicConfig(level=logging.INFO)
 
 
 class Compatibility(enum.Enum):
@@ -106,7 +103,7 @@ class Producer:
 
     def send(self, orders: typing.List[Order], schema: AvroSchema):
         if not self.check_registry():
-            logging.info(f"registry not found, create {self.registry}")
+            print(f"registry not found, create {self.registry}")
             self.create_registry()
 
         for order in orders:
@@ -155,10 +152,10 @@ def lambda_function(event, context):
         schema = AvroSchema(Order.updated_avro_schema(Compatibility.BACKWARD))
         producer.send(orders, schema)
         ttl_rec += len(orders)
-        logging.info(f"sent {len(orders)} messages")
+        print(f"sent {len(orders)} messages")
         elapsed_sec = (datetime.datetime.now() - s).seconds
         if elapsed_sec > int(os.getenv("MAX_RUN_SEC", "60")):
-            logging.info(f"{ttl_rec} records are sent in {elapsed_sec} seconds ...")
+            print(f"{ttl_rec} records are sent in {elapsed_sec} seconds ...")
             break
         time.sleep(1)
 
