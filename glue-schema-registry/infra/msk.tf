@@ -66,6 +66,38 @@ resource "aws_security_group" "msk" {
   tags = local.tags
 }
 
+# for lambda event source mapping
+resource "aws_security_group_rule" "msk_ingress_self_broker" {
+  type                     = "ingress"
+  description              = "msk ingress self"
+  security_group_id        = aws_security_group.msk.id
+  protocol                 = "tcp"
+  from_port                = 9098
+  to_port                  = 9098
+  source_security_group_id = aws_security_group.msk.id
+}
+
+resource "aws_security_group_rule" "msk_egress_self_broker" {
+  type                     = "egress"
+  description              = "msk egress self"
+  security_group_id        = aws_security_group.msk.id
+  protocol                 = "tcp"
+  from_port                = 9098
+  to_port                  = 9098
+  source_security_group_id = aws_security_group.msk.id
+}
+
+# resource "aws_security_group_rule" "msk_egress_https_all" {
+#   type              = "egress"
+#   description       = "msk egress 443 all"
+#   security_group_id = aws_security_group.msk.id
+#   protocol          = "tcp"
+#   from_port         = 443
+#   to_port           = 443
+#   cidr_blocks       = ["0.0.0.0/0"]
+# }
+
+# for other services
 resource "aws_security_group_rule" "msk_vpn_inbound" {
   count                    = local.vpn.to_create ? 1 : 0
   type                     = "ingress"
