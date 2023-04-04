@@ -122,6 +122,9 @@ module "kafka_consumer_lambda" {
   attach_policies        = true
   policies               = [aws_iam_policy.msk_lambda_consumer_permission.arn]
   number_of_policies     = 1
+  environment_variables = {
+    REGISTRY_NAME = local.producer.environment.registry_name
+  }
 
   tags = local.tags
 }

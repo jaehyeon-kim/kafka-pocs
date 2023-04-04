@@ -61,6 +61,9 @@ locals {
     runtime           = "python3.8"
     topic_name        = "orders"
     starting_position = "TRIM_HORIZON"
+    environment = {
+      registry_name = "customer"
+    }
   }
 
   tags = {
