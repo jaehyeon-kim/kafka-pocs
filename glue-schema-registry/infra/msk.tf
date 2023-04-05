@@ -160,10 +160,10 @@ resource "aws_security_group" "kafka_app_lambda" {
 
 resource "aws_security_group_rule" "kafka_app_lambda_msk_egress" {
   type              = "egress"
-  description       = "lambda msk access"
+  description       = "allow outbound all"
   security_group_id = aws_security_group.kafka_app_lambda.id
-  protocol          = "tcp"
-  from_port         = 9098
-  to_port           = 9098
+  protocol          = "-1"
+  from_port         = 0
+  to_port           = 0
   cidr_blocks       = ["0.0.0.0/0"]
 }
