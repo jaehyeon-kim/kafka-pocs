@@ -97,7 +97,27 @@ resource "aws_security_group_rule" "msk_egress_self_broker" {
 #   cidr_blocks       = ["0.0.0.0/0"]
 # }
 
-# for other services
+# resource "aws_security_group_rule" "msk_self_inbound" {
+#   type                     = "ingress"
+#   description              = "allow ingress from self - required for MSK Connect"
+#   security_group_id        = aws_security_group.msk.id
+#   protocol                 = "-1"
+#   from_port                = "0"
+#   to_port                  = "0"
+#   source_security_group_id = aws_security_group.msk.id
+# }
+
+resource "aws_security_group_rule" "msk_all_outbound" {
+  type              = "egress"
+  description       = "allow outbound all"
+  security_group_id = aws_security_group.msk.id
+  protocol          = "-1"
+  from_port         = "0"
+  to_port           = "0"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
+# for other resources
 resource "aws_security_group_rule" "msk_vpn_inbound" {
   count                    = local.vpn.to_create ? 1 : 0
   type                     = "ingress"
@@ -117,26 +137,6 @@ resource "aws_security_group_rule" "msk_lambda_inbound" {
   from_port                = 9098
   to_port                  = 9098
   source_security_group_id = aws_security_group.kafka_app_lambda.id
-}
-
-# resource "aws_security_group_rule" "msk_self_inbound" {
-#   type                     = "ingress"
-#   description              = "allow ingress from self - required for MSK Connect"
-#   security_group_id        = aws_security_group.msk.id
-#   protocol                 = "-1"
-#   from_port                = "0"
-#   to_port                  = "0"
-#   source_security_group_id = aws_security_group.msk.id
-# }
-
-resource "aws_security_group_rule" "msk_all_outbound" {
-  type              = "egress"
-  description       = "allow outbound all"
-  security_group_id = aws_security_group.msk.id
-  protocol          = "-1"
-  from_port         = "0"
-  to_port           = "0"
-  cidr_blocks       = ["0.0.0.0/0"]
 }
 
 resource "aws_cloudwatch_log_group" "msk_cluster_lg" {
