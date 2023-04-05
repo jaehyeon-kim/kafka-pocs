@@ -15,6 +15,7 @@ from dataclasses_avroschema import AvroModel
 from aws_schema_registry import SchemaRegistryClient
 from aws_schema_registry.avro import AvroSchema
 from aws_schema_registry.adapter.kafka import KafkaSerializer
+from aws_schema_registry.exception import SchemaRegistryException
 
 
 class Compatibility(enum.Enum):
@@ -74,17 +75,28 @@ class Order(AvroModel, InjectCompatMixin):
         return cls(fake.uuid4(), datetime.datetime.utcnow(), user_id, order_items)
 
     def create(self, num: int):
-        return [Order.auto() for _ in range(num)]
+        return [self.auto() for _ in range(num)]
+
+
+@dataclasses.dataclass
+class OrderMore(Order):
+    is_prime: bool
+
+    @classmethod
+    def auto(cls, fake: Faker = Faker()):
+        o = Order.auto()
+        return cls(o.order_id, o.ordered_at, o.user_id, o.order_items, fake.pybool())
 
 
 class Producer:
-    def __init__(self, bootstrap_servers: list, topic: str, registry: str):
+    def __init__(self, bootstrap_servers: list, topic: str, registry: str, is_local: bool = False):
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
         self.registry = registry
         self.glue_client = boto3.client(
             "glue", region_name=os.getenv("AWS_DEFAULT_REGION", "ap-southeast-2")
         )
+        self.is_local = is_local
         self.producer = self.create()
 
     @property
@@ -93,13 +105,17 @@ class Producer:
         return KafkaSerializer(client)
 
     def create(self):
-        return KafkaProducer(
-            security_protocol="SASL_SSL",
-            sasl_mechanism="AWS_MSK_IAM",
-            bootstrap_servers=self.bootstrap_servers,
-            key_serializer=lambda v: json.dumps(v, default=self.serialize).encode("utf-8"),
-            value_serializer=self.serializer,
-        )
+        params = {
+            "bootstrap_servers": self.bootstrap_servers,
+            "key_serializer": lambda v: json.dumps(v, default=self.serialize).encode("utf-8"),
+            "value_serializer": self.serializer,
+        }
+        if not self.is_local:
+            params = {
+                **params,
+                **{"security_protocol": "SASL_SSL", "sasl_mechanism": "AWS_MSK_IAM"},
+            }
+        return KafkaProducer(**params)
 
     def send(self, orders: typing.List[Order], schema: AvroSchema):
         if not self.check_registry():
@@ -108,7 +124,12 @@ class Producer:
 
         for order in orders:
             data = order.asdict()
-            self.producer.send(self.topic, key={"order_id": data["order_id"]}, value=(data, schema))
+            try:
+                self.producer.send(
+                    self.topic, key={"order_id": data["order_id"]}, value=(data, schema)
+                )
+            except SchemaRegistryException as e:
+                raise RuntimeError("fails to send a message") from e
         self.producer.flush()
 
     def serialize(self, obj):
@@ -161,4 +182,18 @@ def lambda_function(event, context):
 
 
 if __name__ == "__main__":
-    lambda_function({}, {})
+    producer = Producer(
+        bootstrap_servers=os.environ["BOOTSTRAP_SERVERS"].split(","),
+        topic=os.environ["TOPIC_NAME"],
+        registry=os.environ["REGISTRY_NAME"],
+        is_local=True,
+    )
+    use_more = os.getenv("USE_MORE") is not None
+    if not use_more:
+        orders = Order.auto().create(1)
+        schema = AvroSchema(Order.updated_avro_schema(Compatibility.BACKWARD))
+    else:
+        orders = OrderMore.auto().create(1)
+        schema = AvroSchema(OrderMore.updated_avro_schema(Compatibility.BACKWARD))
+    print(orders)
+    producer.send(orders, schema)

@@ -33,6 +33,23 @@ services:
       - kafka_0_data:/bitnami/kafka
     depends_on:
       - zookeeper
+  kpow:
+    image: factorhouse/kpow-ce:91.2.1
+    container_name: kpow
+    ports:
+      - "3000:3000"
+    networks:
+      - kafkanet
+    environment:
+      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+      AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN
+      BOOTSTRAP: kafka-0:9092
+      SCHEMA_REGISTRY_ARN: $SCHEMA_REGISTRY_ARN
+      SCHEMA_REGISTRY_REGION: $AWS_DEFAULT_REGION
+    depends_on:
+      - zookeeper
+      - kafka-0
 
 networks:
   kafkanet:
