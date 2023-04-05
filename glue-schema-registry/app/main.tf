@@ -101,6 +101,17 @@ resource "aws_iam_policy" "msk_lambda_producer_permission" {
         ]
         Effect   = "Allow"
         Resource = "arn:aws:kafka:${local.region}:${data.aws_caller_identity.current.account_id}:group/${local.infra_prefix}-msk-cluster/*"
+      },
+      {
+        Sid = "PermissionOnGlueSchema"
+        Action = [
+          "glue:*Schema*",
+          "glue:GetRegistry",
+          "glue:CreateRegistry",
+          "glue:ListRegistries",
+        ]
+        Effect   = "Allow"
+        Resource = "*"
       }
     ]
   })
@@ -189,6 +200,15 @@ resource "aws_iam_policy" "msk_lambda_consumer_permission" {
           "ec2:DescribeVpcs",
           "ec2:DescribeSubnets",
           "ec2:DescribeSecurityGroups"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+      {
+        Sid = "PermissionOnGlueSchema"
+        Action = [
+          "glue:*Schema*",
+          "glue:ListRegistries"
         ]
         Effect   = "Allow"
         Resource = "*"
