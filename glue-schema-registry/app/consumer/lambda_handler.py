@@ -38,7 +38,7 @@ class ConsumerRecord:
     def parse_key(self):
         return base64.b64decode(self.key).decode()
 
-    def parse_value(self, deserializer: KafkaDeserializer):
+    def parse_value(self, deserializer: LambdaDeserializer):
         parsed = deserializer.deserialize(self.topic, base64.b64decode(self.value))
         return parsed.data
 
@@ -49,7 +49,7 @@ class ConsumerRecord:
         return ts
 
     def parse_record(
-        self, deserializer: KafkaDeserializer, to_str: bool = True, to_json: bool = True
+        self, deserializer: LambdaDeserializer, to_str: bool = True, to_json: bool = True
     ):
         rec = {
             **self.__dict__,
