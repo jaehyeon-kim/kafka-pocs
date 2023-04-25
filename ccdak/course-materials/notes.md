@@ -170,15 +170,14 @@ A kafka topic has a replication factor of 3 and min.insync.replicas setting of 1
 
 - 2
 
-To enhance compression, I can increase the chances of batching by using - linger.ms=20
-Which of the following setting increases the chance of batching for a Kafka Producer? - increase linger.ms
+Which of the following setting increases the chance of batching for a Kafka Producer?
 
-- linger.ms forces the producer to wait before sending messages, hence increasing the chance of creating batches that can be heavily compressed.
+- increase `linger.ms`
+- `linger.ms` forces the producer to wait before sending messages, hence increasing the chance of creating batches that can be heavily compressed.
 
-Your producer is producing at a very high rate and the batches are completely full each time. How can you improve the producer throughput?
+To enhance compression, I can increase the chances of batching by using
 
-- enable compression and increase `batch.size`
-- `linger.ms` will have no effect as the batches are already full
+- `linger.ms=20`
 
 Your producer is producing at a very high rate and the batches are completely full each time. How can you improve the producer throughput?
 
@@ -195,7 +194,7 @@ Which of the following errors are retriable from a producer perspective?
   - MESSAGE_TOO_LARGE
   - TOPIC_AUTHORIZATION_FAILED
 
-A topic has three replicas and you set min.insync.replicas to 2. If two out of three replicas are not available, what happens when a produce request with acks=all is sent to broker?
+A topic has three replicas and you set `min.insync.replicas` to 2. If two out of three replicas are not available, what happens when a produce request with `acks=all` is sent to broker?
 
 - `NotEnoughReplicasException` will be returned
 - With this configuration, a single in-sync replica becomes read-only. Produce request will receive NotEnoughReplicasException.
@@ -204,14 +203,14 @@ A Kafka producer application wants to send log messages to a topic that does not
 
 - bootstrap.servers, key.serializer, value.serializer
 
-If I produce to a topic that does not exist, and the broker setting auto.create.topic.enable=true, what will happen?
+If I produce to a topic that does not exist, and the broker setting `auto.create.topic.enable=true`, what will happen?
 
-- Kafka will automatically create the topic with the broker settings num.partitions and default.replication.factor
+- Kafka will automatically create the topic with the broker settings `num.partitions` and `default.replication.factor`
 
-What is the risk of increasing max.in.flight.requests.per.connection while also enabling retries in a producer?
+What is the risk of increasing `max.in.flight.requests.per.connection` while also enabling retries in a producer?
 
 - message order not preserved
-- Some messages may require multiple retries. If there are more than 1 requests in flight, it may result in messages received out of order. Note an exception to this rule is if you enable the producer setting: enable.idempotence=true which takes care of the out of ordering case on its own. See: https://issues.apache.org/jira/browse/KAFKA-5494
+- Some messages may require multiple retries. If there are more than 1 requests in flight, it may result in messages received out of order. Note an exception to this rule is if you enable the producer setting: `enable.idempotence=true` which takes care of the out of ordering case on its own. See: https://issues.apache.org/jira/browse/KAFKA-5494
 
 To prevent network-induced duplicates when producing to Kafka, I should use
 
@@ -233,9 +232,8 @@ private class ProducerCallback implements Callback {
             }
         }
 }
-    ProducerRecord<String, String> record =
-            new ProducerRecord<>("topic1", "key1", "value1");
-    producer.send(record, new ProducerCallback());
+ProducerRecord<String, String> record = new ProducerRecord<>("topic1", "key1", "value1");
+producer.send(record, new ProducerCallback());
 ```
 
 - when the broker response is received
@@ -297,7 +295,7 @@ A client connects to a broker in the cluster and sends a fetch request for a par
 
 - send metadata request to the same broker for the topic and select the broker hosting the leader replica
 
-A producer just sent a message to the leader broker for a topic partition. The producer used acks=1 and therefore the data has not yet been replicated to followers. Under which conditions will the consumer see the message?
+A producer just sent a message to the leader broker for a topic partition. The producer used `acks=1` and therefore the data has not yet been replicated to followers. Under which conditions will the consumer see the message?
 
 - when the high watermark has advanced
 - The high watermark is an advanced Kafka concept, and is advanced once all the ISR replicates the latest offsets. A consumer can only read up to the value of the High Watermark (which can be less than the highest offset, in the case of acks=1)
@@ -337,25 +335,25 @@ Which actions will trigger partition rebalance for a consumer group?
 - add a new consumer to consumer group
 - increase partitions to a topic
 
-A topic has three replicas and you set min.insync.replicas to 2. If two out of three replicas are not available, what happens when a consume request is sent to broker?
+A topic has three replicas and you set `min.insync.replicas` to 2. If two out of three replicas are not available, what happens when a consume request is sent to broker?
 
 - data will be returned from the remaining in-sync replica
 - note record cannot be produced in this situation
 
 You are building a consumer application that processes events from a Kafka topic. What is the most important metric to monitor to ensure real-time processing?
 
-- records-lag-max
+- `records-lag-max`
 
 How can you gracefully make a Kafka consumer to stop immediately polling data from Kafka and gracefully shut down a consumer application?
 
 - call `consumer.wakeUp()` and catch a `WakeUpException`
 - See https://stackoverflow.com/a/37748336/3019499
 
-A consumer starts and has auto.offset.reset=none, and the topic partition currently has data for offsets going from 45 to 2311. The consumer group has committed the offset 10 for the topic before. Where will the consumer read from?
+A consumer starts and has `auto.offset.reset=none`, and the topic partition currently has data for offsets going from 45 to 2311. The consumer group has committed the offset 10 for the topic before. Where will the consumer read from?
 
-- auto.offset.reset=none means that the consumer will crash if the offsets it's recovering from have been deleted from Kafka, which is the case here, as 10 < 45
+- `auto.offset.reset=none` means that the consumer will crash if the offsets it's recovering from have been deleted from Kafka, which is the case here, as 10 < 45
 
-A consumer is configured with enable.auto.commit=false. What happens when close() is called on the consumer object?
+A consumer is configured with `enable.auto.commit=false`. What happens when close() is called on the consumer object?
 
 - a rebalance in the consumer group will happen immediately
 - Calling close() on consumer immediately triggers a partition rebalance as the consumer will not be available anymore.
@@ -413,14 +411,18 @@ You want to sink data from a Kafka topic to S3 using Kafka Connect. There are 10
 
 - 2
 
-You are using JDBC source connector to copy data from 2 tables to two Kafka topics. There is one connector created with max.tasks equal to 2 deployed on a cluster of 3 workers. How many tasks are launched?
+You are using JDBC source connector to copy data from 2 tables to two Kafka topics. There is one connector created with `max.tasks` equal to 2 deployed on a cluster of 3 workers. How many tasks are launched?
 
 - 2
 
-When using plain JSON data with Connect, you see the following error message: `org.apache.kafka.connect.errors.DataException: JsonDeserializer with schemas.enable requires "schema" and "payload" fields and may not contain additional fields.` How will you fix the error?
+When using plain JSON data with Connect, you see the following error message:
+
+`org.apache.kafka.connect.errors.DataException: JsonDeserializer with schemas.enable requires "schema" and "payload" fields and may not contain additional fields.`
+
+How will you fix the error?
 
 - set `key.converter.schemas.enable` and `value.converter.schemas.enable` to false
-- You will need to set the schemas.enable parameters for the converter to false for plain text with no schema.
+- You will need to set the `schemas.enable` parameters for the converter to false for plain text with no schema.
 
 ## Stream/KSQL
 
@@ -443,7 +445,7 @@ How will you read all the messages from a topic in your KSQL query?
 In Kafka Streams, by what value are internal topics prefixed by?
 
 - `application.id`
-- In Kafka Streams, the application.id is also the underlying group.id for your consumers, and the prefix for all internal topics (repartition and state)
+- In Kafka Streams, the `application.id` is also the underlying `group.id` for your consumers, and the prefix for all internal topics (repartition and state)
 
 Where are KSQL-related data and metadata stored?
 
@@ -454,15 +456,15 @@ What is an adequate topic configuration for the topic word-count-output?
 
 ```
 StreamsBuilder builder = new StreamsBuilder();
-        KStream<String, String> textLines = builder.stream("word-count-input");
-        KTable<String, Long> wordCounts = textLines
-                .mapValues(textLine -> textLine.toLowerCase())
-                .flatMapValues(textLine -> Arrays.asList(textLine.split("\W+")))
-                .selectKey((key, word) -> word)
-                .groupByKey()
-                .count(Materialized.as("Counts"));
-        wordCounts.toStream().to("word-count-output", Produced.with(Serdes.String(), Serdes.Long()));
-        builder.build();
+KStream<String, String> textLines = builder.stream("word-count-input");
+KTable<String, Long> wordCounts = textLines
+        .mapValues(textLine -> textLine.toLowerCase())
+        .flatMapValues(textLine -> Arrays.asList(textLine.split("\W+")))
+        .selectKey((key, word) -> word)
+        .groupByKey()
+        .count(Materialized.as("Counts"));
+wordCounts.toStream().to("word-count-output", Produced.with(Serdes.String(), Serdes.Long()));
+builder.build();
 ```
 
 - `cleanup.policy=compact`
