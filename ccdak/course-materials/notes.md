@@ -5,20 +5,20 @@ How do Kafka brokers ensure great performance between the producers and consumer
 - it does not transform the messages
 - it leverages zero-copy optimisation to send data straight from the page-cache
 
-If I supply the setting compression.type=snappy to my producer, what will happen? (select two)
+If I supply the setting `compression.type=snappy` to my producer, what will happen? (select two)
 
 - the producer/consumer have to compress the data
 - Kafka transfers data with zero copy and no transformation. Any transformation (including compression) is the responsibility of clients.
-
-The Controller is a broker that is...
-
-- is responsible for partition leader election
-- elected by Zookeeper ensemble
 
 If you enable an SSL endpoint in Kafka, what feature of Kafka will be lost?
 
 - zero copy
 - With SSL, messages will need to be encrypted and decrypted, by being first loaded into the JVM, so you lose the zero copy optimization. See more information here: https://twitter.com/ijuma/status/1161303431501324293?s=09
+
+The Controller is a broker that is...
+
+- is responsible for partition leader election
+- elected by Zookeeper ensemble
 
 What happens when `broker.rack` configuration is provided in broker configuration in Kafka cluster?
 
@@ -99,8 +99,9 @@ What's a Kafka partition made of?
 Which of the following statements are true regarding the number of partitions of a topic?
 
 - we can add partitions of a topic using the kafka-topics.sh command
+- `kafka-topics.sh --bootstrap-server localhost:9092 --alter --topic test --partitions 4`
 
-There are five brokers in a cluster, a topic with 10 partitions and replication factor of 3, and a quota of producer_bytes_rate of 1 MB/sec has been specified for the client. What is the maximum throughput allowed for the client?
+There are five brokers in a cluster, a topic with 10 partitions and replication factor of 3, and a quota of `producer_bytes_rate` of 1 MB/sec has been specified for the client. What is the maximum throughput allowed for the client?
 
 - 5 MB/s
 - Each producer is allowed to produce 1 MB/s to a broker. Max throughput `5 * 1 MB`, because we have 5 brokers.
@@ -109,7 +110,7 @@ There are five brokers in a cluster, a topic with 10 partitions and replication 
 
 How do you create a topic named test with 3 partitions and 3 replicas using the Kafka CLI?
 
-- `kafka-topics.sh --create --bootstrap-server localhost:9092 --partitions 3 --replication-factor 3`
+- `kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test --partitions 3 --replication-factor 3`
 
 How will you find out all the partitions where one or more of the replicas for the partition are not in-sync with the leader?
 
@@ -156,7 +157,7 @@ You have a Zookeeper cluster that needs to be able to withstand the loss of 2 se
 
 A Zookeeper configuration has tickTime of 2000, initLimit of 20 and syncLimit of 5. What's the timeout value for followers to connect to Zookeeper?
 
-- 2000 x 20 = 4000 ms = 40 s
+- 2,000 x 20 = 40,000 ms = 40 s
 
 What are the requirements for a Kafka broker to connect to a Zookeeper ensemble?
 
