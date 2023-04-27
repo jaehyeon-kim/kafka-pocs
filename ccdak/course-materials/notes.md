@@ -502,3 +502,40 @@ If I want to send binary data through the REST proxy, it needs to be base64 enco
 
 - producer
 - REST Proxy requires to receive data over REST that is already base64 encoded, hence it is the responsibility of the producer
+
+## Additional Notes
+
+Some Important Producer Metrics
+
+- `response-rate` (global and per broker): Responses (acks) received per second. Sudden changes in this value could
+  signal a problem, though what the problem could be depends on your configuration.
+- `request-rate` (global and per broker): Average requests sent per second. Requests can contain multiple records,
+  so this is not the number of records. It does give you part of the overall throughput picture.
+- `request-latency-avg` (per broker): Average request latency in ms. High latency could be a sign of performance
+  issues, or just large batches.
+- `outgoing-byte-rate` (global and per broker): Bytes sent per second. Good picture of your network throughput.
+  Helps with network planning.
+- `io-wait-time-ns-avg` (global only): Average time spent waiting for a socket ready for reads/writes in nanoseconds.
+  High wait times might mean your producers are producing more data than the cluster can accept and process.
+
+Some Important Consumer Metrics
+
+- `records-lag-max`: Maximum record lag. How far the consumer is behind producers. In a situation where real-time
+  processing is important, high lag might mean you need more consumers.
+- `bytes-consumed-rate`: Rate of bytes consumed per second. Gives a good idea of throughput.
+- `records-consumed-rate`: Rate of records consumed per second.
+- `fetch-rate`: Fetch requests per second. If this falls suddenly or goes to zero, it may be an indication of problems
+  with the consumer
+
+Producer Tuning
+
+- `acks`
+- `retries` (note max.in.flight.requests.per.connection)
+- `batch.size`
+
+Consumer Tuning
+
+- `fetch.min.bytes`
+- `heartbeat.interval.ms`
+- `auto.offset.reset`
+- `enable.auto.commit`
