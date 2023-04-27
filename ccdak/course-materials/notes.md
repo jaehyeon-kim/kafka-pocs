@@ -508,7 +508,7 @@ If I want to send binary data through the REST proxy, it needs to be base64 enco
 Some Important Producer Metrics
 
 - `response-rate` (global and per broker): Responses (acks) received per second. Sudden changes in this value could
-  signal a problem, though what the problem could be depends on your configuration.
+  signal a problem, though what the problem could depends on your configuration.
 - `request-rate` (global and per broker): Average requests sent per second. Requests can contain multiple records,
   so this is not the number of records. It does give you part of the overall throughput picture.
 - `request-latency-avg` (per broker): Average request latency in ms. High latency could be a sign of performance
@@ -530,7 +530,7 @@ Some Important Consumer Metrics
 Producer Tuning
 
 - `acks`
-- `retries` (note max.in.flight.requests.per.connection)
+- `retries` (note `max.in.flight.requests.per.connection`)
 - `batch.size`
 
 Consumer Tuning
