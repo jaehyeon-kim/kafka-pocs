@@ -5,7 +5,7 @@ How do Kafka brokers ensure great performance between the producers and consumer
 - it does not transform the messages
 - it leverages zero-copy optimisation to send data straight from the page-cache
 
-If I supply the setting `compression.type=snappy` to my producer, what will happen? (select two)
+If I supply the setting `compression.type=snappy` to my producer, what will happen?
 
 - the producer/consumer have to compress the data
 - Kafka transfers data with zero copy and no transformation. Any transformation (including compression) is the responsibility of clients.
@@ -23,7 +23,7 @@ The Controller is a broker that is...
 What happens when `broker.rack` configuration is provided in broker configuration in Kafka cluster?
 
 - replicas for a partition are spread across different racks
-- Partitions for newly created topics are assigned in a rack alternating manner, this is the only change broker.rack does
+- Partitions for newly created topics are assigned in a rack alternating manner, this is the only change `broker.rack` does
 
 Which of the following is true regarding thread safety in the Java Kafka Clients?
 
@@ -44,6 +44,8 @@ How much should be the heap size of a broker in a production setup on a machine 
 
 What is true about Kafka brokers and clients from version 0.10.2 onwards?
 
+- New broker can communicate with older clients.
+- New client can communicate with older brokers. (new)
 - A newer client can talk to a newer broker, and an old client talk to a newer broker
 - Kafka's new bidirectional client compatibility introduced in 0.10.2 allows this. Read more here: https://www.confluent.io/blog/upgrading-apache-kafka-clients-just-got-easier/
 
@@ -62,9 +64,9 @@ What is not a valid authentication mechanism in Kafka?
 
 Select all that applies
 
-- min.insync.replicas is a topic (or broker) setting
-- min.insync.replicas only matters if acks=all
-- acks is a producer setting
+- `min.insync.replicas` is a topic (or broker) setting
+- `min.insync.replicas` only matters if `acks=all`
+- `acks` is a producer setting
 
 A producer application in a developer machine was able to send messages to a Kafka topic. After copying the producer application into another developer's machine, the producer is able to connect to Kafka but unable to produce to the same Kafka topic because of an authorization issue. What is the likely issue?
 
@@ -166,7 +168,7 @@ What are the requirements for a Kafka broker to connect to a Zookeeper ensemble?
 
 ## Producer
 
-A kafka topic has a replication factor of 3 and min.insync.replicas setting of 1. What is the maximum number of brokers that can be down so that a producer with acks=all can still produce to the topic?
+A kafka topic has a replication factor of 3 and `min.insync.replicas` setting of 1. What is the maximum number of brokers that can be down so that a producer with `acks=all` can still produce to the topic?
 
 - 2
 
@@ -197,7 +199,7 @@ Which of the following errors are retriable from a producer perspective?
 A topic has three replicas and you set `min.insync.replicas` to 2. If two out of three replicas are not available, what happens when a produce request with `acks=all` is sent to broker?
 
 - `NotEnoughReplicasException` will be returned
-- With this configuration, a single in-sync replica becomes read-only. Produce request will receive NotEnoughReplicasException.
+- With this configuration, a single in-sync replica becomes read-only. Produce request will receive `NotEnoughReplicasException`.
 
 A Kafka producer application wants to send log messages to a topic that does not include any key. What are the properties that are mandatory to configure for the producer configuration?
 
@@ -291,7 +293,7 @@ while (true) {
   }
 ```
 
-A client connects to a broker in the cluster and sends a fetch request for a partition in a topic. It gets an exception NotLeaderForPartitionException in the response. How does client handle this situation?
+A client connects to a broker in the cluster and sends a fetch request for a partition in a topic. It gets an exception `NotLeaderForPartitionException` in the response. How does client handle this situation?
 
 - send metadata request to the same broker for the topic and select the broker hosting the leader replica
 
