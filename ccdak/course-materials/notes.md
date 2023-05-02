@@ -316,7 +316,7 @@ consumer.assign(pc);
 
 In the Kafka consumer metrics it is observed that fetch-rate is very high and each fetch is small. What steps will you take to increase throughput?
 
-- increase `feach.min.bytes`
+- increase `fetch.min.bytes`
 
 You are doing complex calculations using a machine learning framework on records fetched from a Kafka topic. It takes more about 6 minutes to process a record batch, and the consumer enters rebalances even though it's still running. How can you improve this scenario?
 
