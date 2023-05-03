@@ -1,0 +1,14 @@
+[Unit]
+Description=Apache Zookeeper server
+Documentation=http://zookeeper.apache.org
+Requires=network.target remote-fs.target
+After=network.target remote-fs.target
+
+[Service]
+Type=simple
+Environment="KAFKA_OPTS=-Djava.security.auth.login.config=/home/ubuntu/kafka/config/zookeeper_jaas.conf"
+ExecStart=/home/ubuntu/kafka/bin/zookeeper-server-start.sh /home/ubuntu/kafka/config/zookeeper.properties
+ExecStop=/home/ubuntu/kafka/bin/zookeeper-server-stop.sh
+
+[Install]
+WantedBy=multi-user.target
