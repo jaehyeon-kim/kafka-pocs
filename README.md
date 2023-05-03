@@ -10,3 +10,15 @@
   - In Part 1, we discussed a streaming ingestion solution using [EventBridge](https://aws.amazon.com/eventbridge/), [Lambda](https://aws.amazon.com/lambda/), [MSK](https://aws.amazon.com/msk/) and [Redshift Serverless](https://aws.amazon.com/redshift/redshift-serverless/). Athena provides the [MSK connector](https://docs.aws.amazon.com/athena/latest/ug/connectors-msk.html) to enable SQL queries on Apache Kafka topics directly and it can also facilitate the extraction of insights without setting up an additional pipeline to store data into S3. In this post, we discuss how to update the streaming ingestion solution so that data in the Kafka topic can be queried by Athena instead of Redshift.
 - [Integrate Glue Schema Registry With Your Python Kafka App](https://jaehyeon.me/blog/2023-04-12-integrate-glue-schema-registry/)
   - [Glue Schema Registry](https://docs.aws.amazon.com/glue/latest/dg/schema-registry.html) provides a centralized repository for managing and validating schemas for topic message data. Its features can be utilized by many AWS services when building data streaming applications. In this post, we will discuss how to integrate Python Kafka producer and consumer apps in AWS Lambda with the Glue Schema Registry.
+- Kafka Development with Docker
+  - Apache Kafka is one of the key technologies for [modern data streaming architectures](https://docs.aws.amazon.com/whitepapers/latest/build-modern-data-streaming-analytics-architectures/build-modern-data-streaming-analytics-architectures.html) on AWS. Developing and testing Kafka-related applications can be easier using [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/). In this series of posts, I will demonstrate reference implementations of those applications in Dockerized environments.
+    - [Part 1 Kafka Cluster Setup](https://jaehyeon.me/blog/2023-05-04-kafka-development-with-docker-part-1/)
+    - Part 2 Kafka Management UI
+    - Part 3 Kafka Connect without Schema Registry
+    - Part 4 Glue Schema Registry
+    - Part 5 Kafka Connect with Glue Schema Registry
+    - Part 6 SSL Encryption
+    - Part 7 SSL Authentication
+    - Part 8 SASL Authentication
+    - Part 9 Kafka Authorization
+    - (More topics related to MSK, MSK Connect...)
