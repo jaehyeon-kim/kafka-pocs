@@ -12,7 +12,7 @@ services:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-0:9092,kafka-1:9092,kafka-2:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
-  kpow: # https://docs.kpow.io/ce/
+  kpow:
     image: factorhouse/kpow-ce:91.2.1
     container_name: kpow
     ports:

@@ -46,8 +46,6 @@ class Producer:
 
     def create(self):
         return KafkaProducer(
-            security_protocol="SASL_SSL",
-            sasl_mechanism="AWS_MSK_IAM",
             bootstrap_servers=self.bootstrap_servers,
             value_serializer=lambda v: json.dumps(v, default=self.serialize).encode("utf-8"),
             key_serializer=lambda v: json.dumps(v, default=self.serialize).encode("utf-8"),
@@ -56,9 +54,7 @@ class Producer:
     def send(self, orders: typing.List[Order]):
         for order in orders:
             try:
-                self.producer.send(
-                    self.topic, key={"order_id": order.order_id}, value=order.asdict()
-                )
+                self.producer.send(self.topic, key={"user_id": order.user_id}, value=order.asdict())
             except Exception as e:
                 raise RuntimeError("fails to send a message") from e
         self.producer.flush()
@@ -73,14 +69,17 @@ class Producer:
 
 if __name__ == "__main__":
     producer = Producer(
-        bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS", "localhost:9093").split(","),
+        bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS", "localhost:29092").split(","),
         topic=os.getenv("TOPIC_NAME", "orders"),
     )
-    max_run = int(os.getenv("MAX_RUN", "100"))
+    max_run = int(os.getenv("MAX_RUN", "10"))
+    print(f"max run - {max_run}")
     current_run = 0
     while True:
         current_run += 1
+        print(f"current run - {current_run}")
         if current_run >= max_run:
+            print(f"current run reaches max run, finish")
             producer.producer.close()
             break
         producer.send(Order.auto().create(100))
