@@ -72,15 +72,15 @@ if __name__ == "__main__":
         bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS", "localhost:29092").split(","),
         topic=os.getenv("TOPIC_NAME", "orders"),
     )
-    max_run = int(os.getenv("MAX_RUN", "10"))
+    max_run = int(os.getenv("MAX_RUN", "20"))
     print(f"max run - {max_run}")
     current_run = 0
     while True:
         current_run += 1
         print(f"current run - {current_run}")
-        if current_run >= max_run:
-            print(f"current run reaches max run, finish")
+        if current_run > max_run:
+            print(f"exceeds max run, finish")
             producer.producer.close()
             break
         producer.send(Order.auto().create(100))
-        time.sleep(1)
+        time.sleep(0.5)
