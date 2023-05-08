@@ -54,7 +54,9 @@ class Producer:
     def send(self, orders: typing.List[Order]):
         for order in orders:
             try:
-                self.producer.send(self.topic, key={"user_id": order.user_id}, value=order.asdict())
+                self.producer.send(
+                    self.topic, key={"order_id": order.order_id}, value=order.asdict()
+                )
             except Exception as e:
                 raise RuntimeError("fails to send a message") from e
         self.producer.flush()
