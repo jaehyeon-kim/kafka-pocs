@@ -16,9 +16,9 @@ services:
       AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
       AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN
     volumes:
+      - "./configs/connect-distributed.properties:/opt/bitnami/kafka/config/connect-distributed.properties"
       - "./connectors/confluent-s3/lib:/opt/connectors/confluent-s3"
       - "./connectors/msk-datagen:/opt/connectors/msk-datagen"
-      - "./configs/connect-distributed.properties:/opt/bitnami/kafka/config/connect-distributed.properties"
 
 networks:
   kafkanet:

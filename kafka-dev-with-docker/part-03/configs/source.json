@@ -1,5 +1,5 @@
 {
-  "name": "orders-source",
+  "name": "order-source",
   "config": {
     "connector.class": "com.amazonaws.mskdatagen.GeneratorSourceConnector",
     "tasks.max": "2",
@@ -16,7 +16,7 @@
     "genv.order.quantity.with": "#{number.number_between '1','5'}",
     "genv.order.customer_id.matching": "customer.key",
 
-    "global.throttle.ms": "2000",
+    "global.throttle.ms": "200",
     "global.history.records.max": "1000"
   }
 }
