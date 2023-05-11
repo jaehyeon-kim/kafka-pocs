@@ -5,7 +5,6 @@ SRC_PATH=${SCRIPT_DIR}/connectors
 rm -rf ${SRC_PATH} && mkdir -p ${SRC_PATH}/msk-datagen
 
 ## Confluent S3 Sink Connector
-S3_SINK_CONNECTOR_VERSION="10.4.3"
 echo "downloading confluent s3 connector..."
 DOWNLOAD_URL=https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-s3/versions/10.4.3/confluentinc-kafka-connect-s3-10.4.3.zip
 
