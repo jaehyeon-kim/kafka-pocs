@@ -40,10 +40,8 @@ class Consumer:
     def print_info(self, msg: dict):
         for t, v in msg.items():
             for r in v:
-                ts = r.timestamp
-                dt = datetime.datetime.fromtimestamp(ts / 1000).isoformat()
                 logging.info(
-                    f"key={r.key}, value={r.value}, topic={t.topic}, partition={t.partition}, offset={r.offset}, ts={ts}, dt={dt}"
+                    f"key={r.key}, value={r.value}, topic={t.topic}, partition={t.partition}, offset={r.offset}, ts={r.timestamp}"
                 )
 
 
