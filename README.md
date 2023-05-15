@@ -12,13 +12,14 @@
   - [Glue Schema Registry](https://docs.aws.amazon.com/glue/latest/dg/schema-registry.html) provides a centralized repository for managing and validating schemas for topic message data. Its features can be utilized by many AWS services when building data streaming applications. In this post, we will discuss how to integrate Python Kafka producer and consumer apps in AWS Lambda with the Glue Schema Registry.
 - Kafka Development with Docker
   - Apache Kafka is one of the key technologies for [modern data streaming architectures](https://docs.aws.amazon.com/whitepapers/latest/build-modern-data-streaming-analytics-architectures/build-modern-data-streaming-analytics-architectures.html) on AWS. Developing and testing Kafka-related applications can be easier using [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/). In this series of posts, I will demonstrate reference implementations of those applications in Dockerized environments.
-    - [Part 1 Kafka Cluster Setup](https://jaehyeon.me/blog/2023-05-04-kafka-development-with-docker-part-1/)
-    - Part 2 Kafka Management UI
-    - Part 3 Kafka Connect without Schema Registry
-    - Part 4 Glue Schema Registry
-    - Part 5 Kafka Connect with Glue Schema Registry
-    - Part 6 SSL Encryption
-    - Part 7 SSL Authentication
-    - Part 8 SASL Authentication
-    - Part 9 Kafka Authorization
-    - (More topics related to MSK, MSK Connect...)
+    - [Part 1 Cluster Setup](https://jaehyeon.me/blog/2023-05-04-kafka-development-with-docker-part-1/)
+    - Part 2 Management App
+    - Part 3 Kafka Connect
+    - Part 4 Produce/Consume Messages
+    - Part 5 Glue Schema Registry
+    - Part 6 Kafka Connect with Glue Schema Registry
+    - Part 7 Produce/Consume Messages with Glue Schema Registry
+    - Part 8 SSL Encryption
+    - Part 9 SSL Authentication
+    - Part 10 SASL Authentication
+    - Part 11 Kafka Authorization
