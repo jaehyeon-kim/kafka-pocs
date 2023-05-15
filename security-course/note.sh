@@ -7,6 +7,8 @@ https://docs.aws.amazon.com/msk/latest/developerguide/kafka_apis_iam.html
 https://stackoverflow.com/questions/51630260/connect-to-kafka-running-in-docker#51634499
 https://github.com/bitnami/containers/tree/main/bitnami/kafka#accessing-apache-kafka-with-internal-and-external-clients
 
+https://wiki.folio.org/pages/viewpage.action?spaceKey=FOLIJET&title=Enabling+SSL+and+ACL+for+Kafka
+
 setup a certificate authority
 setup a broker certificate
 sign a broker certificate
