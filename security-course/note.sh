@@ -9,6 +9,8 @@ https://github.com/bitnami/containers/tree/main/bitnami/kafka#accessing-apache-k
 
 https://wiki.folio.org/pages/viewpage.action?spaceKey=FOLIJET&title=Enabling+SSL+and+ACL+for+Kafka
 
+https://github.com/bitnami/containers/blob/main/bitnami/kafka/README.md
+
 setup a certificate authority
 setup a broker certificate
 sign a broker certificate
@@ -20,3 +22,21 @@ test setup using a secure ssl producer/consumer
 https://docs.confluent.io/platform/current/kafka/authentication_ssl.html
 https://docs.confluent.io/platform/current/security/security_tutorial.html#security-tutorial
 https://docs.confluent.io/platform/current/security/security_tutorial.html#generating-keys-certs
+
+docker exec -it kafka-0 bash
+cd /opt/bitnami/kafka/bin/
+
+./kafka-topics.sh --bootstrap-server kafka-0:9093 \
+  --create --topic orders --partitions 3 --replication-factor 3 \
+  --command-config /opt/bitnami/kafka/config/client.properties
+# Created topic orders.
+
+./kafka-console-producer.sh --bootstrap-server kafka-0:9093 \
+  --topic orders --producer.config /opt/bitnami/kafka/config/client.properties
+
+product: apples, quantity: 5
+product: lemons, quantity: 7
+
+./kafka-console-consumer.sh --bootstrap-server kafka-0:9093 \
+  --topic orders --consumer.config /opt/bitnami/kafka/config/client.properties \
+  --from-beginning

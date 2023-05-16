@@ -11,6 +11,8 @@ ccdak/security/keystore
 ccdak/security/truststore
 glue-schema-registry/app/consumer/evt.py
 /kafka-dev-with-docker/part-03/connectors
+truststore
+keystore
 
 ## sam
 .aws-sam*
