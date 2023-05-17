@@ -10,7 +10,7 @@ export PATH="/opt/maven/bin:$PATH"
 ## build
 echo "building glue schema registry..."
 cd plugins/$SOURCE_NAME/build-tools \
-  && mvn clean install -DskipTests -Dcheckstyle.skip \
+  && mvn clean install -DskipTests -Dcheckstyle.skip -Dmaven.javadoc.skip=true \
   && cd .. \
-  && mvn clean install -DskipTests -Dmaven.javadoc.skip=true \
+  && mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dmaven.javadoc.skip=true \
   && mvn dependency:copy-dependencies
