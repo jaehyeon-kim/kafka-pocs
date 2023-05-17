@@ -14,3 +14,11 @@ mvn clean install -DskipTests -Dmaven.wagon.http.ssl.insecure=true
 cd ..
 mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.ssl.insecure=true 
 mvn dependency:copy-dependencies
+
+
+echo "building glue schema registry..."
+cd plugins/$SOURCE_NAME/build-tools \
+  && mvn clean install -DskipTests -Dcheckstyle.skip -Dmaven.javadoc.skip=true \
+  && cd .. \
+  && mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dmaven.javadoc.skip=true \
+  && mvn dependency:copy-dependencies
