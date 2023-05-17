@@ -8,8 +8,15 @@ rm -rf ${SRC_PATH} && mkdir ${SRC_PATH}
 echo "downloading glue schema registry..."
 VERSION=v.1.1.15
 DOWNLOAD_URL=https://github.com/awslabs/aws-glue-schema-registry/archive/refs/tags/$VERSION.zip
-ARCHIVE_NAME=aws-glue-schema-registry-$VERSION
+SOURCE_NAME=aws-glue-schema-registry-$VERSION
 
-curl -L -o ${SRC_PATH}/$ARCHIVE_NAME.zip ${DOWNLOAD_URL} \
-  && unzip -qq ${SRC_PATH}/$ARCHIVE_NAME.zip -d ${SRC_PATH} \
-  && rm ${SRC_PATH}/$ARCHIVE_NAME.zip
+curl -L -o ${SRC_PATH}/$SOURCE_NAME.zip ${DOWNLOAD_URL} \
+  && unzip -qq ${SRC_PATH}/$SOURCE_NAME.zip -d ${SRC_PATH} \
+  && rm ${SRC_PATH}/$SOURCE_NAME.zip
+
+echo "building glue schema registry..."
+cd plugins/$SOURCE_NAME/build-tools \
+  && mvn clean install -DskipTests -Dcheckstyle.skip \
+  && cd .. \
+  && mvn clean install -DskipTests -Dmaven.javadoc.skip=true \
+  && mvn dependency:copy-dependencies
