@@ -16,7 +16,14 @@ curl -L -o ${SRC_PATH}/$SOURCE_NAME.zip ${DOWNLOAD_URL} \
 
 echo "building glue schema registry..."
 cd plugins/$SOURCE_NAME/build-tools \
-  && mvn clean install -DskipTests -Dcheckstyle.skip \
+  && mvn clean install -Dcheckstyle.skip \
   && cd .. \
-  && mvn clean install -DskipTests -Dmaven.javadoc.skip=true \
+  && mvn clean install -Dmaven.javadoc.skip=true \
   && mvn dependency:copy-dependencies
+
+# echo "building glue schema registry..."
+# cd plugins/$SOURCE_NAME/build-tools \
+#   && mvn clean install -DskipTests -Dcheckstyle.skip \
+#   && cd .. \
+#   && mvn clean install -DskipTests -Dmaven.javadoc.skip=true \
+#   && mvn dependency:copy-dependencies

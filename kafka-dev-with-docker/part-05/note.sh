@@ -12,5 +12,5 @@ export PATH="/opt/maven/bin:$PATH"
 cd plugins/aws-glue-schema-registry-v.1.1.15/build-tools
 mvn clean install -DskipTests -Dmaven.wagon.http.ssl.insecure=true
 cd ..
-mvn clean install -DskipTests
+mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dmaven.wagon.http.ssl.insecure=true 
 mvn dependency:copy-dependencies
