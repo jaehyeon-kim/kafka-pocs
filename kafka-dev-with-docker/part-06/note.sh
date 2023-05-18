@@ -21,3 +21,7 @@ cd plugins/$SOURCE_NAME/build-tools \
   && cd .. \
   && mvn clean install -DskipTests -Dmaven.wagon.http.ssl.insecure=true \
   && mvn dependency:copy-dependencies
+
+## to do
+# 1. check custom name
+# 2. kafka-ui
