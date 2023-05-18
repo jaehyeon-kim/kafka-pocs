@@ -1,0 +1,37 @@
+version: "3.5"
+
+services:
+  # kafka-ui:
+  #   image: provectuslabs/kafka-ui:master
+  #   container_name: kafka-ui
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - kafkanet
+  #   environment:
+  #     KAFKA_CLUSTERS_0_NAME: local
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-0:9092,kafka-1:9092,kafka-2:9092
+  #     KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+  #     KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: local
+  #     KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
+  kpow:
+    image: factorhouse/kpow-ce:91.2.1
+    container_name: kpow
+    ports:
+      - "3000:3000"
+    networks:
+      - kafkanet
+    environment:
+      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+      AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN
+      # kafka cluster
+      BOOTSTRAP: kafka-0:9092,kafka-1:9092,kafka-2:9092
+      # glue schema registry
+      SCHEMA_REGISTRY_ARN: $SCHEMA_REGISTRY_ARN
+      SCHEMA_REGISTRY_REGION: $AWS_DEFAULT_REGION
+
+networks:
+  kafkanet:
+    external: true
+    name: kafka-network

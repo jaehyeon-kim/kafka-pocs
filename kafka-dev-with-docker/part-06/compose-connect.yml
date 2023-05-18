@@ -1,0 +1,27 @@
+version: "3.5"
+
+services:
+  kafka-connect:
+    image: bitnami/kafka:2.8.1
+    container_name: connect
+    command: >
+      /opt/bitnami/kafka/bin/connect-distributed.sh
+      /opt/bitnami/kafka/config/connect-distributed.properties
+    ports:
+      - "8083:8083"
+    networks:
+      - kafkanet
+    environment:
+      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+      AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN
+    volumes:
+      - "./configs/connect-distributed.properties:/opt/bitnami/kafka/config/connect-distributed.properties"
+      - "./connectors/confluent-s3/lib:/opt/connectors/confluent-s3"
+      - "./connectors/msk-datagen:/opt/connectors/msk-datagen"
+      - "./plugins/aws-glue-schema-registry-v.1.1.15/avro-kafkaconnect-converter/target:/opt/glue-schema-registry/avro"
+
+networks:
+  kafkanet:
+    external: true
+    name: kafka-network
