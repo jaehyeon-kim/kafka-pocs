@@ -27,6 +27,13 @@ cd plugins/$SOURCE_NAME/build-tools \
 # 2. kafka-ui
 
 
+$ mvn --version
+Apache Maven 3.6.3
+Maven home: /usr/share/maven
+Java version: 11.0.19, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en, platform encoding: UTF-8
+OS name: "linux", version: "5.4.72-microsoft-standard-wsl2", arch: "amd64", family: "unix"
+
 [INFO] ------------------------------------------------------------------------
 [INFO] Reactor Summary for AWS Glue Schema Registry Library 1.1.15:
 [INFO] 
