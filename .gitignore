@@ -11,6 +11,7 @@ ccdak/security/keystore
 ccdak/security/truststore
 glue-schema-registry/app/consumer/evt.py
 kafka-dev-with-docker/*/connectors
+kafka-connect-for-aws/*/connectors
 kafka-dev-with-docker/*/plugins
 truststore
 keystore
