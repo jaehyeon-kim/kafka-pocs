@@ -14,8 +14,11 @@
     "partitioner.class": "io.confluent.connect.storage.partitioner.DefaultPartitioner",
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "key.converter.schemas.enable": false,
-    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-    "value.converter.schemas.enable": false,
+    "value.converter": "com.amazonaws.services.schemaregistry.kafkaconnect.AWSKafkaAvroConverter",
+    "value.converter.schemas.enable": true,
+    "value.converter.region": "ap-southeast-2",
+    "value.converter.avroRecordType": "GENERIC_RECORD",
+    "value.converter.registry.name": "online-order",
     "errors.log.enable": "true"
   }
 }

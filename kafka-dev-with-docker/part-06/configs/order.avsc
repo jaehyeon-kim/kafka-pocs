@@ -1,0 +1,23 @@
+{
+  "type": "record",
+  "name": "Gen0",
+  "namespace": "com.amazonaws.mskdatagen",
+  "fields": [
+    {
+      "name": "quantity",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "product_id",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "customer_id",
+      "type": ["null", "string"],
+      "default": null
+    }
+  ],
+  "connect.name": "com.amazonaws.mskdatagen.Gen0"
+}

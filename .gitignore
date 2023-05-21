@@ -15,6 +15,7 @@ kafka-connect-for-aws/*/connectors
 kafka-dev-with-docker/*/plugins
 truststore
 keystore
+kafkaui-glue-serde-*-jar-with-dependencies.jar
 
 ## sam
 .aws-sam*
