@@ -1,7 +1,7 @@
 import os
-import datetime
 import time
 import logging
+
 from kafka import KafkaConsumer
 from kafka.errors import KafkaError
 
@@ -47,7 +47,7 @@ class Consumer:
 
 if __name__ == "__main__":
     consumer = Consumer(
-        bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS", "localhost:9093").split(","),
+        bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS", "localhost:29092").split(","),
         topics=os.getenv("TOPIC_NAME", "orders").split(","),
         group_id=os.getenv("GROUP_ID", "orders-group"),
     )
