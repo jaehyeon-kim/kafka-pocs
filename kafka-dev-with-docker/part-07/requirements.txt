@@ -1,0 +1,5 @@
+Faker
+kafka-python
+aws-glue-schema-registry
+dataclasses-avroschema
+black
