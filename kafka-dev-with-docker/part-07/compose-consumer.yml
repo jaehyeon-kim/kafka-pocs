@@ -7,12 +7,17 @@ services:
     networks:
       - kafkanet
     environment:
+      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+      AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN
       BOOTSTRAP_SERVERS: kafka-0:9092,kafka-1:9092,kafka-2:9092
       TOPIC_NAME: orders
       GROUP_ID: orders-group
+      REGISTRY_NAME: online-order
       TZ: Australia/Sydney
     volumes:
-      - .:/app
+      - ./consumer.py:/app/consumer.py
+      - ./requirements.txt:/app/requirements.txt
 
 networks:
   kafkanet:

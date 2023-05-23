@@ -9,9 +9,25 @@ services:
     networks:
       - kafkanet
     environment:
+      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+      AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN
+      # kafka cluster
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-0:9092,kafka-1:9092,kafka-2:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      # glue schema registry serde
+      KAFKA_CLUSTERS_0_SERDE_0_NAME: online-order
+      KAFKA_CLUSTERS_0_SERDE_0_FILEPATH: /glue-serde/kafkaui-glue-serde-v1.0.3-jar-with-dependencies.jar
+      KAFKA_CLUSTERS_0_SERDE_0_CLASSNAME: com.provectus.kafka.ui.serdes.glue.GlueSerde
+      KAFKA_CLUSTERS_0_SERDE_0_PROPERTIES_REGION: $AWS_DEFAULT_REGION #required
+      KAFKA_CLUSTERS_0_SERDE_0_PROPERTIES_REGISTRY: online-order #required, name of Glue Schema Registry
+      # template that will be used to find schema name for topic key. Optional, default is null (not set).
+      # KAFKA_CLUSTERS_0_SERDE_0_PROPERTIES_KEYSCHEMANAMETEMPLATE: "%s-key"
+      # template that will be used to find schema name for topic value. Optional, default is '%s'
+      # KAFKA_CLUSTERS_0_SERDE_0_PROPERTIES_VALUESCHEMANAMETEMPLATE: "%s-value"
+    volumes:
+      - ./kafkaui-glue-serde-v1.0.3-jar-with-dependencies.jar:/glue-serde/kafkaui-glue-serde-v1.0.3-jar-with-dependencies.jar
   kpow:
     image: factorhouse/kpow-ce:91.2.1
     container_name: kpow
@@ -20,7 +36,14 @@ services:
     networks:
       - kafkanet
     environment:
+      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+      AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN
+      # kafka cluster
       BOOTSTRAP: kafka-0:9092,kafka-1:9092,kafka-2:9092
+      # glue schema registry
+      SCHEMA_REGISTRY_ARN: $SCHEMA_REGISTRY_ARN
+      SCHEMA_REGISTRY_REGION: $AWS_DEFAULT_REGION
 
 networks:
   kafkanet:

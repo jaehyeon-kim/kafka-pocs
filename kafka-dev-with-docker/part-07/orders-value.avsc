@@ -1,0 +1,45 @@
+{
+  "doc": "Online fake order item",
+  "namespace": "Order V1",
+  "name": "Order",
+  "compatibility": "BACKWARD",
+  "type": "record",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": "string"
+    },
+    {
+      "name": "ordered_at",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    },
+    {
+      "name": "user_id",
+      "type": "string"
+    },
+    {
+      "name": "order_items",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "OrderItem",
+          "fields": [
+            {
+              "name": "product_id",
+              "type": "long"
+            },
+            {
+              "name": "quantity",
+              "type": "long"
+            }
+          ]
+        },
+        "name": "order_item"
+      }
+    }
+  ]
+}
