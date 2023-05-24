@@ -7,6 +7,7 @@ resource "aws_s3_bucket" "default_bucket" {
 }
 
 resource "aws_s3_bucket_acl" "default_bucket" {
+  count  = local.default_bucket.to_update_acl ? 1 : 0
   bucket = aws_s3_bucket.default_bucket.id
   acl    = "private"
 }

@@ -13,7 +13,7 @@ resource "aws_kinesis_firehose_delivery_stream" "delivery_stream" {
 
   redshift_configuration {
     role_arn        = aws_iam_role.firehose_role[0].arn
-    cluster_jdbcurl = "jdbc:redshift://${aws_redshiftserverless_workgroup.workgroup.endpoint}/${local.redshift.db_name}"
+    cluster_jdbcurl = "jdbc:redshift://${module.redshift.cluster_endpoint}/${local.redshift.db_name}"
     username        = local.redshift.admin_username
     password        = random_password.redshift_admin_pw.result
     data_table_name = local.redshift.table_name
@@ -41,7 +41,6 @@ resource "aws_iam_role" "firehose_role" {
       {
         Action = "sts:AssumeRole"
         Effect = "Allow"
-        Sid    = ""
         Principal = {
           Service = "firehose.amazonaws.com"
         }

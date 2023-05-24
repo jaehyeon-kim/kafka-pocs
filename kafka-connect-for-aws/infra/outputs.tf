@@ -69,27 +69,60 @@ output "msk_bootstrap_brokers_sasl_iam" {
 }
 
 # redshift resources
-output "redshift_ns_name" {
-  description = "Redshift serverless namespace name"
-  value       = aws_redshiftserverless_namespace.namespace.id
+# Redshift
+output "redshift_cluster_arn" {
+  description = "The Redshift cluster ARN"
+  value       = module.redshift.cluster_arn
 }
 
-output "redshift_ns_id" {
-  description = "Redshift serverless namespace id"
-  value       = aws_redshiftserverless_namespace.namespace.namespace_id
+output "redshift_cluster_endpoint" {
+  description = "The Redshift connection endpoint"
+  value       = module.redshift.cluster_endpoint
 }
 
-output "redshift_wg_name" {
-  description = "Redshift serverless workgroup name"
-  value       = aws_redshiftserverless_workgroup.workgroup.id
+output "redshift_cluster_hostname" {
+  description = "The hostname of the Redshift cluster"
+  value       = module.redshift.cluster_hostname
 }
 
-output "redshift_wg_id" {
-  description = "Redshift serverless workgroup name"
-  value       = aws_redshiftserverless_workgroup.workgroup.workgroup_id
+output "redshift_cluster_port" {
+  description = "The port the Redshift cluster responds on"
+  value       = module.redshift.cluster_port
 }
 
-output "redshift_wg_endpoint" {
-  description = "Endpoint that is created from the workgroup"
-  value       = aws_redshiftserverless_workgroup.workgroup.endpoint
+output "redshift_cluster_vpc_security_group_ids" {
+  description = "The VPC security group ids associated with the Redshift cluster"
+  value       = module.redshift.cluster_vpc_security_group_ids
+}
+
+# # redshift serverless resources
+# output "redshift_ns_name" {
+#   description = "Redshift serverless namespace name"
+#   value       = aws_redshiftserverless_namespace.namespace.id
+# }
+
+# output "redshift_ns_id" {
+#   description = "Redshift serverless namespace id"
+#   value       = aws_redshiftserverless_namespace.namespace.namespace_id
+# }
+
+# output "redshift_wg_name" {
+#   description = "Redshift serverless workgroup name"
+#   value       = aws_redshiftserverless_workgroup.workgroup.id
+# }
+
+# output "redshift_wg_id" {
+#   description = "Redshift serverless workgroup name"
+#   value       = aws_redshiftserverless_workgroup.workgroup.workgroup_id
+# }
+
+# output "redshift_wg_endpoint" {
+#   description = "Endpoint that is created from the workgroup"
+#   value       = aws_redshiftserverless_workgroup.workgroup.endpoint
+# }
+
+# firehose resources
+output "firehose_arn" {
+  description = "Amazon Resource Name (ARN) of the Firehose delivery stream"
+  value       = local.firehose.to_create ? aws_kinesis_firehose_delivery_stream.delivery_stream[0].arn : ""
 }

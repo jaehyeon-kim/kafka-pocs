@@ -1,50 +1,39 @@
-# redshift serverless resources
-resource "aws_redshiftserverless_namespace" "namespace" {
-  namespace_name = "${local.name}-namespace"
+module "redshift" {
+  source  = "terraform-aws-modules/redshift/aws"
+  version = ">= 4.0.0, < 5.0.0"
 
-  admin_username       = local.redshift.admin_username
-  admin_user_password  = random_password.redshift_admin_pw.result
-  db_name              = local.redshift.db_name
-  default_iam_role_arn = aws_iam_role.redshift_serverless_role.arn
-  iam_roles            = [aws_iam_role.redshift_serverless_role.arn]
+  cluster_identifier = local.name
+  node_type          = local.redshift.node_type
+  number_of_nodes    = local.redshift.number_of_nodes
+  port               = local.redshift.port_number
 
-  tags = local.tags
+  database_name   = local.redshift.db_name
+  master_username = local.redshift.admin_username
+  master_password = random_password.redshift_admin_pw.result
+
+  # Redshift network config
+  subnet_ids             = module.vpc.private_subnets
+  vpc_security_group_ids = [aws_security_group.redshift.id]
+  publicly_accessible    = local.redshift_serverless.publicly_accessible
+
+  # IAM Roles
+  default_iam_role_arn = aws_iam_role.redshift_cluster_role.arn
+  iam_role_arns        = [aws_iam_role.redshift_cluster_role.arn]
 }
 
-resource "aws_redshiftserverless_workgroup" "workgroup" {
-  namespace_name = aws_redshiftserverless_namespace.namespace.id
-  workgroup_name = "${local.name}-workgroup"
+resource "aws_iam_role" "redshift_cluster_role" {
+  name = "${local.name}-redshift-cluster-role"
 
-  base_capacity       = local.redshift.base_capacity
-  subnet_ids          = module.vpc.private_subnets
-  security_group_ids  = [aws_security_group.redshift_serverless.id]
-  publicly_accessible = local.redshift.publicly_accessible
-
-  tags = local.tags
-}
-
-resource "aws_redshiftserverless_endpoint_access" "endpoint_access" {
-  endpoint_name = "${local.name}-endpoint"
-
-  workgroup_name = aws_redshiftserverless_workgroup.workgroup.id
-  subnet_ids     = module.vpc.private_subnets
-}
-
-# iam role
-resource "aws_iam_role" "redshift_serverless_role" {
-  name = "${local.name}-redshift-serverless-role"
-
-  assume_role_policy = data.aws_iam_policy_document.redshift_serverless_assume_role_policy.json
+  assume_role_policy = data.aws_iam_policy_document.redshift_cluster_assume_role_policy.json
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/AmazonS3FullAccess",
     "arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess",
     "arn:aws:iam::aws:policy/AmazonRedshiftFullAccess",
-    "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess",
-    aws_iam_policy.msk_redshift_permission.arn
+    "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
   ]
 }
 
-data "aws_iam_policy_document" "redshift_serverless_assume_role_policy" {
+data "aws_iam_policy_document" "redshift_cluster_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
 
@@ -65,56 +54,23 @@ data "aws_iam_policy_document" "redshift_serverless_assume_role_policy" {
   }
 }
 
-resource "aws_iam_policy" "msk_redshift_permission" {
-  name = "${local.name}-msk-redshift-permission"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid = "PermissionOnCluster"
-        Action = [
-          "kafka-cluster:ReadData",
-          "kafka-cluster:DescribeTopic",
-          "kafka-cluster:Connect",
-        ]
-        Effect = "Allow"
-        Resource = [
-          "arn:aws:kafka:*:${data.aws_caller_identity.current.account_id}:cluster/*/*",
-          "arn:aws:kafka:*:${data.aws_caller_identity.current.account_id}:topic/*/*"
-        ]
-      },
-      {
-        Sid = "PermissionOnGroups"
-        Action = [
-          "kafka:GetBootstrapBrokers"
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_security_group" "redshift_serverless" {
-  name   = "${local.name}-redshift-serverless"
+resource "aws_security_group" "redshift" {
+  name   = "${local.name}-redshift-security-group"
   vpc_id = module.vpc.vpc_id
 
   lifecycle {
     create_before_destroy = true
   }
-
-  tags = local.tags
 }
 
-resource "aws_security_group_rule" "redshift_vpn_ingress" {
+resource "aws_security_group_rule" "redshift_vpn_inbound" {
   count                    = local.vpn.to_create ? 1 : 0
   type                     = "ingress"
   description              = "VPN access"
-  security_group_id        = aws_security_group.redshift_serverless.id
+  security_group_id        = aws_security_group.redshift.id
   protocol                 = "tcp"
-  from_port                = 5439
-  to_port                  = 5439
+  from_port                = local.redshift.port_number
+  to_port                  = local.redshift.port_number
   source_security_group_id = aws_security_group.vpn[0].id
 }
 
@@ -122,7 +78,7 @@ resource "aws_security_group_rule" "redshift_firehose_ingress" {
   count             = local.firehose.to_create ? 1 : 0
   type              = "ingress"
   description       = "firehose access"
-  security_group_id = aws_security_group.redshift_serverless.id
+  security_group_id = aws_security_group.redshift.id
   protocol          = "tcp"
   from_port         = 5439
   to_port           = 5439
@@ -133,12 +89,13 @@ resource "aws_security_group_rule" "redshift_msk_ingress" {
   count                    = local.msk.to_create ? 1 : 0
   type                     = "ingress"
   description              = "MSK access"
-  security_group_id        = aws_security_group.redshift_serverless.id
+  security_group_id        = aws_security_group.redshift.id
   protocol                 = "tcp"
   from_port                = 5439
   to_port                  = 5439
   source_security_group_id = aws_security_group.msk[0].id
 }
+
 
 resource "random_password" "redshift_admin_pw" {
   length  = 16
