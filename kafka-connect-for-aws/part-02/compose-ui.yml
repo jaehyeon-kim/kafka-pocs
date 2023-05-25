@@ -1,0 +1,31 @@
+version: "3.5"
+
+services:
+  kafka-ui:
+    image: provectuslabs/kafka-ui:master
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    networks:
+      - kafkanet
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-0:9092,kafka-1:9092,kafka-2:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: local
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
+  kpow:
+    image: factorhouse/kpow-ce:91.2.1
+    container_name: kpow
+    ports:
+      - "3000:3000"
+    networks:
+      - kafkanet
+    environment:
+      BOOTSTRAP: kafka-0:9092,kafka-1:9092,kafka-2:9092
+      CONNECT_REST_URL: http://kafka-connect:8083
+
+networks:
+  kafkanet:
+    external: true
+    name: kafka-network

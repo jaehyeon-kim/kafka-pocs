@@ -1,0 +1,30 @@
+{
+  "TableName": "orders",
+  "KeySchema": [
+    { "AttributeName": "order_id", "KeyType": "HASH" },
+    { "AttributeName": "ordered_at", "KeyType": "RANGE" }
+  ],
+  "AttributeDefinitions": [
+    { "AttributeName": "order_id", "AttributeType": "S" },
+    { "AttributeName": "customer_id", "AttributeType": "S" },
+    { "AttributeName": "ordered_at", "AttributeType": "S" }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 1,
+    "WriteCapacityUnits": 1
+  },
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "customer",
+      "KeySchema": [
+        { "AttributeName": "customer_id", "KeyType": "HASH" },
+        { "AttributeName": "ordered_at", "KeyType": "RANGE" }
+      ],
+      "Projection": { "ProjectionType": "ALL" },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 1,
+        "WriteCapacityUnits": 1
+      }
+    }
+  ]
+}

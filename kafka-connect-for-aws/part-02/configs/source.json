@@ -1,0 +1,26 @@
+{
+  "name": "order-source",
+  "config": {
+    "connector.class": "com.amazonaws.mskdatagen.GeneratorSourceConnector",
+    "tasks.max": "1",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": false,
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false,
+
+    "genk.order.order_id.with": "to-replace",
+    "genv.order.order_id.with": "#{Internet.uuid}",
+    "genv.order.product_id.with": "#{Code.isbn10}",
+    "genv.order.quantity.with": "#{number.number_between '1','5'}",
+    "genv.order.customer_id.with": "#{number.number_between '100','199'}",
+    "genv.order.customer_name.with": "#{Name.full_name}",
+    "global.throttle.ms": "500",
+    "global.history.records.max": "1000",
+
+    "transforms": "copyIdToKey,cast",
+    "transforms.copyIdToKey.type": "org.apache.kafka.connect.transforms.ValueToKey",
+    "transforms.copyIdToKey.fields": "order_id",
+    "transforms.cast.type": "org.apache.kafka.connect.transforms.Cast$Value",
+    "transforms.cast.spec": "quantity:int8,customer_id:int16"
+  }
+}
