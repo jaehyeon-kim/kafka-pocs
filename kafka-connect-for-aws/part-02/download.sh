@@ -12,7 +12,7 @@ curl -L -o ${SRC_PATH}/msk-data-generator.jar ${DOWNLOAD_URL}
 
 ## Download camel dynamodb sink connector
 echo "download camel dynamodb sink connector..."
-DOWNLOAD_URL=https://repo.maven.apache.org/maven2/org/apache/camel/kafkaconnector/camel-aws-ddb-sink-kafka-connector/3.18.2/camel-aws-ddb-sink-kafka-connector-3.18.2-package.tar.gz
+DOWNLOAD_URL=https://repo.maven.apache.org/maven2/org/apache/camel/kafkaconnector/camel-aws-ddb-sink-kafka-connector/3.20.3/camel-aws-ddb-sink-kafka-connector-3.20.3-package.tar.gz
 
 # zip contents to create custom plugin of msk connect later
 curl -o ${SRC_PATH}/camel-aws-ddb-sink-kafka-connector.tar.gz ${DOWNLOAD_URL} \

@@ -3,12 +3,12 @@
   "config": {
     "connector.class": "com.amazonaws.mskdatagen.GeneratorSourceConnector",
     "tasks.max": "1",
-    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "key.converter.schemas.enable": false,
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter.schemas.enable": false,
 
-    "genk.order.order_id.with": "to-replace",
+    "genkp.order.with": "to-replace",
     "genv.order.order_id.with": "#{Internet.uuid}",
     "genv.order.product_id.with": "#{Code.isbn10}",
     "genv.order.quantity.with": "#{number.number_between '1','5'}",
@@ -17,9 +17,11 @@
     "global.throttle.ms": "500",
     "global.history.records.max": "1000",
 
-    "transforms": "copyIdToKey,cast",
+    "transforms": "copyIdToKey,extractKeyFromStruct,cast",
     "transforms.copyIdToKey.type": "org.apache.kafka.connect.transforms.ValueToKey",
     "transforms.copyIdToKey.fields": "order_id",
+    "transforms.extractKeyFromStruct.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+    "transforms.extractKeyFromStruct.field": "order_id",
     "transforms.cast.type": "org.apache.kafka.connect.transforms.Cast$Value",
     "transforms.cast.spec": "quantity:int8,customer_id:int16"
   }
