@@ -23,6 +23,6 @@
     "transforms.extractKeyFromStruct.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
     "transforms.extractKeyFromStruct.field": "order_id",
     "transforms.cast.type": "org.apache.kafka.connect.transforms.Cast$Value",
-    "transforms.cast.spec": "quantity:int8,customer_id:int16"
+    "transforms.cast.spec": "quantity:int8"
   }
 }
