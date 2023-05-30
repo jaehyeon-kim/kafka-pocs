@@ -55,3 +55,6 @@ kafka.server.keystore.jks
 can distribute, import their truststore
 ca-cert
 cert-sigend
+
+https://dev.to/adityakanekar/connecting-to-kafka-cluster-using-ssl-with-python-k2e
+https://docs.aiven.io/docs/products/kafka/howto/connect-with-python

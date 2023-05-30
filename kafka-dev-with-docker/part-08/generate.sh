@@ -56,7 +56,7 @@ keytool -keystore $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE \
   -noprompt -dname "C=$COUNTRY, ST=$STATE, L=$LOCATION, O=$OU, CN=$CN" -keypass $PASSWORD -storepass $PASSWORD
 
 echo
-echo "A keystore will be generated for each host in $KAFKA_HOST as each broker and logical client needs its own keystore"
+echo "A keystore will be generated for each host in $KAFKA_HOSTS_FILE as each broker and logical client needs its own keystore"
 echo
 echo " NOTE: currently in Kafka, the Common Name (CN) does not need to be the FQDN of"
 echo " this host. However, at some point, this may change. As such, make the CN"
