@@ -13,6 +13,7 @@ glue-schema-registry/app/consumer/evt.py
 kafka-dev-with-docker/*/connectors
 kafka-connect-for-aws/*/connectors
 kafka-dev-with-docker/*/plugins
+certificate-authority
 truststore
 keystore
 kafkaui-glue-serde-*-jar-with-dependencies.jar

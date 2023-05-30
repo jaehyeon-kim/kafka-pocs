@@ -56,21 +56,18 @@ keytool -keystore $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE \
   -noprompt -dname "C=$COUNTRY, ST=$STATE, L=$LOCATION, O=$OU, CN=$CN" -keypass $PASSWORD -storepass $PASSWORD
 
 echo
-echo "Now, a keystore will be generated. Each broker and logical client needs its own"
-echo "keystore. This script will create only one keystore. Run this script multiple"
-echo "times for multiple keystores."
+echo "A keystore will be generated for each host in $KAFKA_HOSTS_FILE as each broker and logical client needs its own keystore"
 echo
 echo " NOTE: currently in Kafka, the Common Name (CN) does not need to be the FQDN of"
 echo " this host. However, at some point, this may change. As such, make the CN"
 echo " the FQDN. Some operating systems call the CN prompt 'first / last name'" 
-# To learn more about CNs and FQDNs, read:
-# https://docs.oracle.com/javase/7/docs/api/javax/net/ssl/X509ExtendedTrustManager.html
+echo " To learn more about CNs and FQDNs, read:"
+echo " https://docs.oracle.com/javase/7/docs/api/javax/net/ssl/X509ExtendedTrustManager.html"
 rm -rf $KEYSTORE_WORKING_DIRECTORY && mkdir $KEYSTORE_WORKING_DIRECTORY
  while read -r KAFKA_HOST || [ -n "$KAFKA_HOST" ]; do
   KEY_STORE_FILE_NAME="$KAFKA_HOST.server.keystore.jks"
   echo
   echo "'$KEYSTORE_WORKING_DIRECTORY/$KEY_STORE_FILE_NAME' will contain a key pair and a self-signed certificate."
- 
   keytool -genkey -keystore $KEYSTORE_WORKING_DIRECTORY/"$KEY_STORE_FILE_NAME" \
     -alias localhost -validity $VALIDITY_IN_DAYS -keyalg RSA \
     -noprompt -dname "C=$COUNTRY, ST=$STATE, L=$LOCATION, O=$OU, CN=$KAFKA_HOST" \
@@ -96,8 +93,8 @@ rm -rf $KEYSTORE_WORKING_DIRECTORY && mkdir $KEYSTORE_WORKING_DIRECTORY
  
   echo
   echo "Now the keystore's signed certificate will be imported back into the keystore."
-  keytool -keystore $KEYSTORE_WORKING_DIRECTORY/"$KEY_STORE_FILE_NAME" -alias localhost -import \
-    -file $KEYSTORE_SIGNED_CERT -keypass $PASSWORD -storepass $PASSWORD
+  keytool -keystore $KEYSTORE_WORKING_DIRECTORY/"$KEY_STORE_FILE_NAME" -alias localhost \
+    -import -file $KEYSTORE_SIGNED_CERT -keypass $PASSWORD -storepass $PASSWORD
 
   echo
   echo "All done!"

@@ -1,0 +1,3 @@
+Faker
+kafka-python
+black

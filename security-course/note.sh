@@ -40,3 +40,21 @@ product: lemons, quantity: 7
 ./kafka-console-consumer.sh --bootstrap-server kafka-0:9093 \
   --topic orders --consumer.config /opt/bitnami/kafka/config/client.properties \
   --from-beginning
+
+
+
+#############
+ca-key
+ca-cert
+- will be external, need to request
+
+never distribute
+ca-key
+kafka.server.keystore.jks
+
+can distribute, import their truststore
+ca-cert
+cert-sigend
+
+https://dev.to/adityakanekar/connecting-to-kafka-cluster-using-ssl-with-python-k2e
+https://docs.aiven.io/docs/products/kafka/howto/connect-with-python
