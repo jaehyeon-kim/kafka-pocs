@@ -8,11 +8,13 @@ OU="${OU:-service-users}"
 CN="${CN:-kafka-admin}"
 LOCATION="${CITY:-}"
 PASSWORD="${PASSWORD:-supersecret}"
+TO_GENERATE_PEM="${CITY:-yes}"
 
 VALIDITY_IN_DAYS=3650
 CA_WORKING_DIRECTORY="certificate-authority"
 TRUSTSTORE_WORKING_DIRECTORY="truststore"
 KEYSTORE_WORKING_DIRECTORY="keystore"
+PEM_WORKING_DIRECTORY="pem"
 CA_KEY_FILE="ca-key"
 CA_CERT_FILE="ca-cert"
 DEFAULT_TRUSTSTORE_FILE="kafka.truststore.jks"
@@ -33,7 +35,6 @@ echo "Two files will be created if not existing:"
 echo " - $CA_WORKING_DIRECTORY/$CA_KEY_FILE -- the private key used later to sign certificates"
 echo " - $CA_WORKING_DIRECTORY/$CA_CERT_FILE -- the certificate that will be"
 echo " stored in the trust store in a moment and serve as the certificate authority (CA)."
-echo
 if [ -f "$CA_WORKING_DIRECTORY/$CA_KEY_FILE" ] && [ -f "$CA_WORKING_DIRECTORY/$CA_CERT_FILE" ]; then
   echo "Use existing $CA_WORKING_DIRECTORY/$CA_KEY_FILE and $CA_WORKING_DIRECTORY/$CA_CERT_FILE ..."
 else
@@ -49,11 +50,19 @@ fi
 
 echo
 echo "Now the trust store will be generated from the certificate."
-echo
 rm -rf $TRUSTSTORE_WORKING_DIRECTORY && mkdir $TRUSTSTORE_WORKING_DIRECTORY
 keytool -keystore $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE \
   -alias CARoot -import -file $CA_WORKING_DIRECTORY/$CA_CERT_FILE \
   -noprompt -dname "C=$COUNTRY, ST=$STATE, L=$LOCATION, O=$OU, CN=$CN" -keypass $PASSWORD -storepass $PASSWORD
+
+if [ $TO_GENERATE_PEM == "yes" ]; then
+  echo
+  echo "Generate $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE for a python client"
+  rm -rf $PEM_WORKING_DIRECTORY && mkdir $PEM_WORKING_DIRECTORY
+
+  keytool -exportcert -alias CARoot -keystore $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE \
+    -rfc -file $PEM_WORKING_DIRECTORY/CARoot.pem -storepass $PASSWORD
+fi
 
 echo
 echo "A keystore will be generated for each host in $KAFKA_HOSTS_FILE as each broker and logical client needs its own keystore"
@@ -64,7 +73,7 @@ echo " the FQDN. Some operating systems call the CN prompt 'first / last name'"
 echo " To learn more about CNs and FQDNs, read:"
 echo " https://docs.oracle.com/javase/7/docs/api/javax/net/ssl/X509ExtendedTrustManager.html"
 rm -rf $KEYSTORE_WORKING_DIRECTORY && mkdir $KEYSTORE_WORKING_DIRECTORY
- while read -r KAFKA_HOST || [ -n "$KAFKA_HOST" ]; do
+while read -r KAFKA_HOST || [ -n "$KAFKA_HOST" ]; do
   KEY_STORE_FILE_NAME="$KAFKA_HOST.server.keystore.jks"
   echo
   echo "'$KEYSTORE_WORKING_DIRECTORY/$KEY_STORE_FILE_NAME' will contain a key pair and a self-signed certificate."

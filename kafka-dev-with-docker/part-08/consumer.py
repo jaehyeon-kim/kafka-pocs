@@ -22,8 +22,6 @@ class Consumer:
             security_protocol="SSL",
             ssl_check_hostname=True,
             ssl_cafile="pem/CARoot.pem",
-            ssl_certfile="pem/certificate.pem",
-            ssl_keyfile="pem/key.pem",
             ssl_password=os.environ["TRUSTSTORE_PASSWORD"],
             auto_offset_reset="earliest",
             enable_auto_commit=True,

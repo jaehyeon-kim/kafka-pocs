@@ -3,6 +3,7 @@ version: "3.5"
 services:
   producer:
     image: bitnami/python:3.9
+    container_name: producer
     command: "sh -c 'pip install -r requirements.txt && python producer.py'"
     networks:
       - kafkanet
@@ -15,6 +16,7 @@ services:
       - .:/app
   consumer:
     image: bitnami/python:3.9
+    container_name: consumer
     command: "sh -c 'pip install -r requirements.txt && python consumer.py'"
     networks:
       - kafkanet

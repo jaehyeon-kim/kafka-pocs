@@ -23,22 +23,22 @@ https://docs.confluent.io/platform/current/kafka/authentication_ssl.html
 https://docs.confluent.io/platform/current/security/security_tutorial.html#security-tutorial
 https://docs.confluent.io/platform/current/security/security_tutorial.html#generating-keys-certs
 
-docker exec -it kafka-0 bash
+docker exec -it kafka-1 bash
 cd /opt/bitnami/kafka/bin/
 
 ./kafka-topics.sh --bootstrap-server kafka-0:9093 \
-  --create --topic orders --partitions 3 --replication-factor 3 \
+  --create --topic inventory --partitions 3 --replication-factor 3 \
   --command-config /opt/bitnami/kafka/config/client.properties
 # Created topic orders.
 
 ./kafka-console-producer.sh --bootstrap-server kafka-0:9093 \
-  --topic orders --producer.config /opt/bitnami/kafka/config/client.properties
+  --topic inventory --producer.config /opt/bitnami/kafka/config/client.properties
 
 product: apples, quantity: 5
 product: lemons, quantity: 7
 
 ./kafka-console-consumer.sh --bootstrap-server kafka-0:9093 \
-  --topic orders --consumer.config /opt/bitnami/kafka/config/client.properties \
+  --topic inventory --consumer.config /opt/bitnami/kafka/config/client.properties \
   --from-beginning
 
 
@@ -56,5 +56,8 @@ can distribute, import their truststore
 ca-cert
 cert-sigend
 
+http://maximilianchrist.com/python/databases/2016/08/13/connect-to-apache-kafka-from-python-using-ssl.html
 https://dev.to/adityakanekar/connecting-to-kafka-cluster-using-ssl-with-python-k2e
+https://github.com/confluentinc/confluent-kafka-python/issues/1350
+
 https://docs.aiven.io/docs/products/kafka/howto/connect-with-python
