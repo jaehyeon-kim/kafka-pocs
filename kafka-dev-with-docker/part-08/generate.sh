@@ -31,10 +31,11 @@ fi
 echo "Welcome to the Kafka SSL certificate authority, key store and trust store generator script."
 
 echo
-echo "Two files will be created if not existing:"
-echo " - $CA_WORKING_DIRECTORY/$CA_KEY_FILE -- the private key used later to sign certificates"
-echo " - $CA_WORKING_DIRECTORY/$CA_CERT_FILE -- the certificate that will be"
-echo " stored in the trust store in a moment and serve as the certificate authority (CA)."
+echo "First we will create our own certificate authority"
+echo "  Two files will be created if not existing:"
+echo "    - $CA_WORKING_DIRECTORY/$CA_KEY_FILE -- the private key used later to sign certificates"
+echo "    - $CA_WORKING_DIRECTORY/$CA_CERT_FILE -- the certificate that will be stored in the trust store" 
+echo "                                                        and serve as the certificate authority (CA)."
 if [ -f "$CA_WORKING_DIRECTORY/$CA_KEY_FILE" ] && [ -f "$CA_WORKING_DIRECTORY/$CA_CERT_FILE" ]; then
   echo "Use existing $CA_WORKING_DIRECTORY/$CA_KEY_FILE and $CA_WORKING_DIRECTORY/$CA_CERT_FILE ..."
 else
@@ -57,7 +58,7 @@ keytool -keystore $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE \
 
 if [ $TO_GENERATE_PEM == "yes" ]; then
   echo
-  echo "Generate $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE for a python client"
+  echo "Generate $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE for a non-java client"
   rm -rf $PEM_WORKING_DIRECTORY && mkdir $PEM_WORKING_DIRECTORY
 
   keytool -exportcert -alias CARoot -keystore $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE \
