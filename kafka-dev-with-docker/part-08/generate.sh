@@ -2,11 +2,7 @@
  
 set -eu
 
-COUNTRY="${COUNTRY:-AU}"
-STATE="${STATE:-}"
-OU="${OU:-service-users}"
 CN="${CN:-kafka-admin}"
-LOCATION="${CITY:-}"
 PASSWORD="${PASSWORD:-supersecret}"
 TO_GENERATE_PEM="${CITY:-yes}"
 
@@ -43,10 +39,8 @@ else
   echo
   echo "Generate $CA_WORKING_DIRECTORY/$CA_KEY_FILE and $CA_WORKING_DIRECTORY/$CA_CERT_FILE ..."
   echo
-  openssl req -new -newkey rsa:4096 -days $VALIDITY_IN_DAYS -x509 \
-    -subj "/C=$COUNTRY/ST=$STATE/L=$LOCATION/O=$OU/CN=$CN" \
-    -keyout $CA_WORKING_DIRECTORY/$CA_KEY_FILE \
-    -out $CA_WORKING_DIRECTORY/$CA_CERT_FILE -nodes
+  openssl req -new -newkey rsa:4096 -days $VALIDITY_IN_DAYS -x509 -subj "/CN=$CN" \
+    -keyout $CA_WORKING_DIRECTORY/$CA_KEY_FILE -out $CA_WORKING_DIRECTORY/$CA_CERT_FILE -nodes
 fi
 
 echo
@@ -54,7 +48,7 @@ echo "Now the trust store will be generated from the certificate."
 rm -rf $TRUSTSTORE_WORKING_DIRECTORY && mkdir $TRUSTSTORE_WORKING_DIRECTORY
 keytool -keystore $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE \
   -alias CARoot -import -file $CA_WORKING_DIRECTORY/$CA_CERT_FILE \
-  -noprompt -dname "C=$COUNTRY, ST=$STATE, L=$LOCATION, O=$OU, CN=$CN" -keypass $PASSWORD -storepass $PASSWORD
+  -noprompt -dname "CN=$CN" -keypass $PASSWORD -storepass $PASSWORD
 
 if [ $TO_GENERATE_PEM == "yes" ]; then
   echo
@@ -75,13 +69,19 @@ echo " To learn more about CNs and FQDNs, read:"
 echo " https://docs.oracle.com/javase/7/docs/api/javax/net/ssl/X509ExtendedTrustManager.html"
 rm -rf $KEYSTORE_WORKING_DIRECTORY && mkdir $KEYSTORE_WORKING_DIRECTORY
 while read -r KAFKA_HOST || [ -n "$KAFKA_HOST" ]; do
-  KEY_STORE_FILE_NAME="$KAFKA_HOST.server.keystore.jks"
+  if [[ $KAFKA_HOST =~ ^kafka-[0-9]+$ ]]; then
+      SUFFIX="server"
+      DNAME="CN=$KAFKA_HOST"
+  else
+      SUFFIX="client"
+      DNAME="CN=client"
+  fi
+  KEY_STORE_FILE_NAME="$KAFKA_HOST.$SUFFIX.keystore.jks"
   echo
   echo "'$KEYSTORE_WORKING_DIRECTORY/$KEY_STORE_FILE_NAME' will contain a key pair and a self-signed certificate."
   keytool -genkey -keystore $KEYSTORE_WORKING_DIRECTORY/"$KEY_STORE_FILE_NAME" \
     -alias localhost -validity $VALIDITY_IN_DAYS -keyalg RSA \
-    -noprompt -dname "C=$COUNTRY, ST=$STATE, L=$LOCATION, O=$OU, CN=$KAFKA_HOST" \
-    -keypass $PASSWORD -storepass $PASSWORD
+    -noprompt -dname $DNAME -keypass $PASSWORD -storepass $PASSWORD
  
   echo
   echo "Now a certificate signing request will be made to the keystore."
