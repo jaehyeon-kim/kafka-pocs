@@ -32,6 +32,7 @@ services:
       - KAFKA_INTER_BROKER_LISTENER_NAME=SSL
       - KAFKA_CFG_SSL_KEYSTORE_LOCATION=/opt/bitnami/kafka/config/certs/kafka.keystore.jks
       - KAFKA_CFG_SSL_KEYSTORE_PASSWORD=supersecret
+      - KAFKA_CFG_SSL_KEY_PASSWORD=supersecret
       - KAFKA_CFG_SSL_TRUSTSTORE_LOCATION=/opt/bitnami/kafka/config/certs/kafka.truststore.jks
       - KAFKA_CFG_SSL_TRUSTSTORE_PASSWORD=supersecret
     volumes:
@@ -61,6 +62,7 @@ services:
       - KAFKA_INTER_BROKER_LISTENER_NAME=SSL
       - KAFKA_CFG_SSL_KEYSTORE_LOCATION=/opt/bitnami/kafka/config/certs/kafka.keystore.jks
       - KAFKA_CFG_SSL_KEYSTORE_PASSWORD=supersecret
+      - KAFKA_CFG_SSL_KEY_PASSWORD=supersecret
       - KAFKA_CFG_SSL_TRUSTSTORE_LOCATION=/opt/bitnami/kafka/config/certs/kafka.truststore.jks
       - KAFKA_CFG_SSL_TRUSTSTORE_PASSWORD=supersecret
     volumes:
@@ -90,6 +92,7 @@ services:
       - KAFKA_INTER_BROKER_LISTENER_NAME=SSL
       - KAFKA_CFG_SSL_KEYSTORE_LOCATION=/opt/bitnami/kafka/config/certs/kafka.keystore.jks
       - KAFKA_CFG_SSL_KEYSTORE_PASSWORD=supersecret
+      - KAFKA_CFG_SSL_KEY_PASSWORD=supersecret
       - KAFKA_CFG_SSL_TRUSTSTORE_LOCATION=/opt/bitnami/kafka/config/certs/kafka.truststore.jks
       - KAFKA_CFG_SSL_TRUSTSTORE_PASSWORD=supersecret
     volumes:

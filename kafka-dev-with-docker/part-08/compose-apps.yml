@@ -11,7 +11,7 @@ services:
       BOOTSTRAP_SERVERS: kafka-0:9093,kafka-1:9093,kafka-2:9093
       TOPIC_NAME: orders
       TZ: Australia/Sydney
-      TRUSTSTORE_PASSWORD: supersecret
+      SSL_PASSWORD: supersecret
     volumes:
       - .:/app
   consumer:
@@ -25,7 +25,7 @@ services:
       TOPIC_NAME: orders
       GROUP_ID: orders-group
       TZ: Australia/Sydney
-      TRUSTSTORE_PASSWORD: supersecret
+      SSL_PASSWORD: supersecret
     volumes:
       - .:/app
 
