@@ -102,10 +102,10 @@ keytool -keystore $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE \
 
 if [ $TO_GENERATE_PEM == "yes" ]; then
   echo
-  echo "Create CA file to use in certificate veriication for a non-java client"
-  echo "  $PEM_WORKING_DIRECTORY/CARoot.pem will be created"
+  echo "The following files for SSL configuration will be created for a non-java client"
+  echo "  $PEM_WORKING_DIRECTORY/ca-root.pem: CA file to use in certificate veriication"
   rm -rf $PEM_WORKING_DIRECTORY && mkdir $PEM_WORKING_DIRECTORY
 
   keytool -exportcert -alias CARoot -keystore $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE \
-    -rfc -file $PEM_WORKING_DIRECTORY/CARoot.pem -storepass $PASSWORD
+    -rfc -file $PEM_WORKING_DIRECTORY/ca-root.pem -storepass $PASSWORD
 fi

@@ -61,3 +61,5 @@ https://dev.to/adityakanekar/connecting-to-kafka-cluster-using-ssl-with-python-k
 https://github.com/confluentinc/confluent-kafka-python/issues/1350
 
 https://docs.aiven.io/docs/products/kafka/howto/connect-with-python
+
+docker logs consumer >& log.log
