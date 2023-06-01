@@ -52,20 +52,12 @@ echo " the FQDN. Some operating systems call the CN prompt 'first / last name'"
 echo " To learn more about CNs and FQDNs, read:"
 echo " https://docs.oracle.com/javase/7/docs/api/javax/net/ssl/X509ExtendedTrustManager.html"
 rm -rf $KEYSTORE_WORKING_DIRECTORY && mkdir $KEYSTORE_WORKING_DIRECTORY
-while read -r KAFKA_HOST || [ -n "$KAFKA_HOST" ]; do
-  if [[ $KAFKA_HOST =~ ^kafka-[0-9]+$ ]]; then
-      SUFFIX="server"
-      DNAME="CN=$KAFKA_HOST"
-  else
-      SUFFIX="client"
-      DNAME="CN=client"
-  fi
-  KEY_STORE_FILE_NAME="$KAFKA_HOST.$SUFFIX.keystore.jks"
+  KEY_STORE_FILE_NAME="$KAFKA_HOST.server.keystore.jks"
   echo
   echo "'$KEYSTORE_WORKING_DIRECTORY/$KEY_STORE_FILE_NAME' will contain a key pair and a self-signed certificate."
   keytool -genkey -keystore $KEYSTORE_WORKING_DIRECTORY/"$KEY_STORE_FILE_NAME" \
     -alias localhost -validity $VALIDITY_IN_DAYS -keyalg RSA \
-    -noprompt -dname $DNAME -keypass $PASSWORD -storepass $PASSWORD
+    -noprompt -dname "CN=$KAFKA_HOST" -keypass $PASSWORD -storepass $PASSWORD
  
   echo
   echo "Now a certificate signing request will be made to the keystore."
