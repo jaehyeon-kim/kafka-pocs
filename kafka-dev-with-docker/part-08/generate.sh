@@ -44,22 +44,6 @@ else
 fi
 
 echo
-echo "Now the trust store will be generated from the certificate."
-rm -rf $TRUSTSTORE_WORKING_DIRECTORY && mkdir $TRUSTSTORE_WORKING_DIRECTORY
-keytool -keystore $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE \
-  -alias CARoot -import -file $CA_WORKING_DIRECTORY/$CA_CERT_FILE \
-  -noprompt -dname "CN=$CN" -keypass $PASSWORD -storepass $PASSWORD
-
-if [ $TO_GENERATE_PEM == "yes" ]; then
-  echo
-  echo "Generate $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE for a non-java client"
-  rm -rf $PEM_WORKING_DIRECTORY && mkdir $PEM_WORKING_DIRECTORY
-
-  keytool -exportcert -alias CARoot -keystore $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE \
-    -rfc -file $PEM_WORKING_DIRECTORY/CARoot.pem -storepass $PASSWORD
-fi
-
-echo
 echo "A keystore will be generated for each host in $KAFKA_HOSTS_FILE as each broker and logical client needs its own keystore"
 echo
 echo " NOTE: currently in Kafka, the Common Name (CN) does not need to be the FQDN of"
@@ -107,7 +91,7 @@ while read -r KAFKA_HOST || [ -n "$KAFKA_HOST" ]; do
     -import -file $KEYSTORE_SIGNED_CERT -keypass $PASSWORD -storepass $PASSWORD
 
   echo
-  echo "All done!"
+  echo "Complete keystore generation!"
   echo
   echo "Deleting intermediate files. They are:"
   echo " - '$CA_WORKING_DIRECTORY/$KEYSTORE_SIGN_REQUEST_SRL': CA serial number"
@@ -116,3 +100,20 @@ while read -r KAFKA_HOST || [ -n "$KAFKA_HOST" ]; do
   echo " into the keystore"
   rm -f $CA_WORKING_DIRECTORY/$KEYSTORE_SIGN_REQUEST_SRL $KEYSTORE_SIGN_REQUEST $KEYSTORE_SIGNED_CERT
 done < "$KAFKA_HOSTS_FILE"
+
+echo
+echo "Now the trust store will be generated from the certificate."
+rm -rf $TRUSTSTORE_WORKING_DIRECTORY && mkdir $TRUSTSTORE_WORKING_DIRECTORY
+keytool -keystore $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE \
+  -alias CARoot -import -file $CA_WORKING_DIRECTORY/$CA_CERT_FILE \
+  -noprompt -dname "CN=$CN" -keypass $PASSWORD -storepass $PASSWORD
+
+if [ $TO_GENERATE_PEM == "yes" ]; then
+  echo
+  echo "Create CA file to use in certificate veriication for a non-java client"
+  echo "  $PEM_WORKING_DIRECTORY/CARoot.pem will be created"
+  rm -rf $PEM_WORKING_DIRECTORY && mkdir $PEM_WORKING_DIRECTORY
+
+  keytool -exportcert -alias CARoot -keystore $TRUSTSTORE_WORKING_DIRECTORY/$DEFAULT_TRUSTSTORE_FILE \
+    -rfc -file $PEM_WORKING_DIRECTORY/CARoot.pem -storepass $PASSWORD
+fi
