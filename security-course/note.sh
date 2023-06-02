@@ -41,6 +41,32 @@ product: lemons, quantity: 7
   --topic inventory --consumer.config /opt/bitnami/kafka/config/client.properties \
   --from-beginning
 
+#############
+docker exec -it kafka-0 bash
+cd /opt/bitnami/kafka/bin/
+
+./kafka-configs.sh --bootstrap-server kafka-1:9092 --describe --entity-type users
+
+./kafka-configs.sh --bootstrap-server kafka-1:9092 --alter --add-config 'SCRAM-SHA-256=[iterations=8192,password=password]' --entity-type users --entity-name user
+./bin/kafka-configs.sh --zookeeper localhost:2181  --alter --delete-config 'SCRAM-SHA-256' --entity-type users --entity-name test-user
+
+./kafka-configs.sh --bootstrap-server kafka-1:9092 --alter --add-config 'SCRAM-SHA-256=[iterations=8192,password=alice-secret],SCRAM-SHA-512=[password=alice-secret]' --entity-type users --entity-name alice
+
+export KAFKA_OPTS="-Djava.security.auth.login.config=/tmp/kafka_client_jaas.conf"
+./kafka-topics.sh --bootstrap-server kafka-0:9094 \
+  --create --topic inventory --partitions 3 --replication-factor 3 \
+  --command-config /opt/bitnami/kafka/config/client.properties
+# Created topic orders.
+
+./kafka-console-producer.sh --bootstrap-server kafka-0:9094 \
+  --topic inventory --producer.config /opt/bitnami/kafka/config/client.properties
+
+product: apples, quantity: 5
+product: lemons, quantity: 7
+
+./kafka-console-consumer.sh --bootstrap-server kafka-0:9094 \
+  --topic inventory --consumer.config /opt/bitnami/kafka/config/client.properties \
+  --from-beginning
 
 
 #############
@@ -63,3 +89,13 @@ https://github.com/confluentinc/confluent-kafka-python/issues/1350
 https://docs.aiven.io/docs/products/kafka/howto/connect-with-python
 
 docker logs consumer >& log.log
+
+https://github.com/bitnami/containers/issues/23077
+https://medium.com/@hussein.joe.au/kafka-authentication-using-sasl-scram-740e55da1fbc
+
+docker run --rm -it  confluentinc/cp-kafka:5.0.1 kafka-configs --zookeeper zookeeper-1:22181 --alter --add-config \
+'SCRAM-SHA-256=[iterations=4096,password=password]' --entity-type users --entity-name metricsreporter
+
+
+https://docs.vmware.com/en/VMware-Smart-Assurance/10.1.0/sa-ui-installation-config-guide-10.1.0/GUID-DF659094-60D3-4E1B-8D63-3DE3ED8B0EDF.html
+https://github.com/vdesabou/kafka-docker-playground/tree/master/environment/sasl-scram

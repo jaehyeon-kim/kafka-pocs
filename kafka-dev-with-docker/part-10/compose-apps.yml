@@ -1,0 +1,35 @@
+version: "3.5"
+
+services:
+  producer:
+    image: bitnami/python:3.9
+    container_name: producer
+    command: "sh -c 'pip install -r requirements.txt && python producer.py'"
+    networks:
+      - kafkanet
+    environment:
+      BOOTSTRAP_SERVERS: kafka-0:9093,kafka-1:9093,kafka-2:9093
+      TOPIC_NAME: orders
+      TZ: Australia/Sydney
+      SSL_PASSWORD: supersecret
+    volumes:
+      - .:/app
+  consumer:
+    image: bitnami/python:3.9
+    container_name: consumer
+    command: "sh -c 'pip install -r requirements.txt && python consumer.py'"
+    networks:
+      - kafkanet
+    environment:
+      BOOTSTRAP_SERVERS: kafka-0:9093,kafka-1:9093,kafka-2:9093
+      TOPIC_NAME: orders
+      GROUP_ID: orders-group
+      TZ: Australia/Sydney
+      SSL_PASSWORD: supersecret
+    volumes:
+      - .:/app
+
+networks:
+  kafkanet:
+    external: true
+    name: kafka-network
