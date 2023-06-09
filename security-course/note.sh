@@ -48,11 +48,14 @@ cd /opt/bitnami/zookeeper/bin/
 
 docker exec -it kafka-0 bash
 cd /opt/bitnami/kafka/bin/
+
 ./kafka-configs.sh --bootstrap-server kafka-0:9092 --describe --entity-type users
+./kafka-configs.sh --bootstrap-server kafka-0:9092 --alter --add-config 'SCRAM-SHA-256=[iterations=8192,password=password]' --entity-type users --entity-name client
 
 ./kafka-configs.sh --bootstrap-server kafka-1:9092 --describe --entity-type users
-
-./kafka-configs.sh --bootstrap-server kafka-0:9092 --alter --add-config 'SCRAM-SHA-256=[iterations=8192,password=password]' --entity-type users --entity-name client
+./kafka-configs.sh --bootstrap-server kafka-1:9092 --alter \
+  --add-config 'SCRAM-SHA-256=[iterations=8192,password=password]' \
+  --entity-type users --entity-name client
 
 ./bin/kafka-configs.sh --zookeeper localhost:2181  --alter --delete-config 'SCRAM-SHA-256' --entity-type users --entity-name test-user
 
@@ -64,12 +67,14 @@ export KAFKA_OPTS="-Djava.security.auth.login.config=/tmp/kafka_client_jaas.conf
   --command-config /opt/bitnami/kafka/config/client.properties
 # Created topic orders.
 
-export KAFKA_OPTS="-Djava.security.auth.login.config=/opt/bitnami/kafka/conf/kafka_jaas.conf"
+# export KAFKA_OPTS="-Djava.security.auth.login.config=/opt/bitnami/kafka/conf/kafka_jaas.conf"
 ./kafka-console-producer.sh --bootstrap-server kafka-0:9094 \
   --topic inventory --producer.config /opt/bitnami/kafka/config/client.properties
 
-./kafka-console-producer.sh --bootstrap-server kafka-0:9094 \
+# export KAFKA_OPTS="-Djava.security.auth.login.config=/opt/bitnami/kafka/conf/kafka_jaas.conf"
+./kafka-console-producer.sh --bootstrap-server kafka-1:9094 \
   --topic inventory --producer.config /opt/bitnami/kafka/config/client.properties
+
 
 product: apples, quantity: 5
 product: lemons, quantity: 7
@@ -78,6 +83,9 @@ product: lemons, quantity: 7
   --topic inventory --consumer.config /opt/bitnami/kafka/config/client.properties \
   --from-beginning
 
+./kafka-console-consumer.sh --bootstrap-server kafka-1:9094 \
+  --topic inventory --consumer.config /opt/bitnami/kafka/config/client.properties \
+  --from-beginning
 
 #############
 ca-key

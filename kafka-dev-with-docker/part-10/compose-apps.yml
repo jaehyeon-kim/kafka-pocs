@@ -8,10 +8,12 @@ services:
     networks:
       - kafkanet
     environment:
-      BOOTSTRAP_SERVERS: kafka-0:9093,kafka-1:9093,kafka-2:9093
+      BOOTSTRAP_SERVERS: kafka-0:9094,kafka-1:9094,kafka-2:9094
       TOPIC_NAME: orders
       TZ: Australia/Sydney
       SSL_PASSWORD: supersecret
+      SASL_USERNAME: client
+      SASL_PASSWORD: password
     volumes:
       - .:/app
   consumer:
@@ -21,11 +23,13 @@ services:
     networks:
       - kafkanet
     environment:
-      BOOTSTRAP_SERVERS: kafka-0:9093,kafka-1:9093,kafka-2:9093
+      BOOTSTRAP_SERVERS: kafka-0:9094,kafka-1:9094,kafka-2:9094
       TOPIC_NAME: orders
       GROUP_ID: orders-group
       TZ: Australia/Sydney
       SSL_PASSWORD: supersecret
+      SASL_USERNAME: client
+      SASL_PASSWORD: password
     volumes:
       - .:/app
 

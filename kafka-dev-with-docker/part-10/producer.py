@@ -50,10 +50,13 @@ class Producer:
     def create(self):
         return KafkaProducer(
             bootstrap_servers=self.bootstrap_servers,
-            security_protocol="SSL",
+            security_protocol="SASL_SSL",
             ssl_check_hostname=True,
             ssl_cafile="pem/ca-root.pem",
             ssl_password=os.environ["SSL_PASSWORD"],
+            sasl_mechanism="SCRAM-SHA-256",
+            sasl_plain_username=os.environ["SASL_USERNAME"],
+            sasl_plain_password=os.environ["SASL_PASSWORD"],
             value_serializer=lambda v: json.dumps(v, default=self.serialize).encode("utf-8"),
             key_serializer=lambda v: json.dumps(v, default=self.serialize).encode("utf-8"),
         )
