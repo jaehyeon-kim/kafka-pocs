@@ -52,6 +52,7 @@ echo " the FQDN. Some operating systems call the CN prompt 'first / last name'"
 echo " To learn more about CNs and FQDNs, read:"
 echo " https://docs.oracle.com/javase/7/docs/api/javax/net/ssl/X509ExtendedTrustManager.html"
 rm -rf $KEYSTORE_WORKING_DIRECTORY && mkdir $KEYSTORE_WORKING_DIRECTORY
+while read -r KAFKA_HOST || [ -n "$KAFKA_HOST" ]; do
   KEY_STORE_FILE_NAME="$KAFKA_HOST.server.keystore.jks"
   echo
   echo "'$KEYSTORE_WORKING_DIRECTORY/$KEY_STORE_FILE_NAME' will contain a key pair and a self-signed certificate."
