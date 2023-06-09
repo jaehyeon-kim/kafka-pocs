@@ -42,12 +42,18 @@ product: lemons, quantity: 7
   --from-beginning
 
 #############
+docker exec -it zookeeper bash
+cd /opt/bitnami/zookeeper/bin/
+./zkCli.sh
+
 docker exec -it kafka-0 bash
 cd /opt/bitnami/kafka/bin/
+./kafka-configs.sh --bootstrap-server kafka-0:9092 --describe --entity-type users
 
 ./kafka-configs.sh --bootstrap-server kafka-1:9092 --describe --entity-type users
 
-./kafka-configs.sh --bootstrap-server kafka-1:9092 --alter --add-config 'SCRAM-SHA-256=[iterations=8192,password=password]' --entity-type users --entity-name user
+./kafka-configs.sh --bootstrap-server kafka-0:9092 --alter --add-config 'SCRAM-SHA-256=[iterations=8192,password=password]' --entity-type users --entity-name client
+
 ./bin/kafka-configs.sh --zookeeper localhost:2181  --alter --delete-config 'SCRAM-SHA-256' --entity-type users --entity-name test-user
 
 ./kafka-configs.sh --bootstrap-server kafka-1:9092 --alter --add-config 'SCRAM-SHA-256=[iterations=8192,password=alice-secret],SCRAM-SHA-512=[password=alice-secret]' --entity-type users --entity-name alice
@@ -57,6 +63,10 @@ export KAFKA_OPTS="-Djava.security.auth.login.config=/tmp/kafka_client_jaas.conf
   --create --topic inventory --partitions 3 --replication-factor 3 \
   --command-config /opt/bitnami/kafka/config/client.properties
 # Created topic orders.
+
+export KAFKA_OPTS="-Djava.security.auth.login.config=/opt/bitnami/kafka/conf/kafka_jaas.conf"
+./kafka-console-producer.sh --bootstrap-server kafka-0:9094 \
+  --topic inventory --producer.config /opt/bitnami/kafka/config/client.properties
 
 ./kafka-console-producer.sh --bootstrap-server kafka-0:9094 \
   --topic inventory --producer.config /opt/bitnami/kafka/config/client.properties
@@ -99,3 +109,7 @@ docker run --rm -it  confluentinc/cp-kafka:5.0.1 kafka-configs --zookeeper zooke
 
 https://docs.vmware.com/en/VMware-Smart-Assurance/10.1.0/sa-ui-installation-config-guide-10.1.0/GUID-DF659094-60D3-4E1B-8D63-3DE3ED8B0EDF.html
 https://github.com/vdesabou/kafka-docker-playground/tree/master/environment/sasl-scram
+
+
+https://heodolf.tistory.com/16
+https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html/using_amq_streams_on_red_hat_enterprise_linux_rhel/configuring_zookeeper

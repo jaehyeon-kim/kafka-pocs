@@ -9,12 +9,9 @@ services:
     networks:
       - kafkanet
     environment:
-      # - ALLOW_ANONYMOUS_LOGIN=yes
       - ZOO_ENABLE_AUTH=yes
-      - ZOO_SERVER_USERS=user,admin
-      - ZOO_SERVER_PASSWORDS=password,password
-      - ZOO_CLIENT_USER=admin
-      - ZOO_CLIENT_PASSWORD=password
+      - ZOO_SERVER_USERS=admin
+      - ZOO_SERVER_PASSWORDS=password
     volumes:
       - zookeeper_data:/bitnami/zookeeper
   kafka-0:
@@ -23,6 +20,7 @@ services:
     expose:
       - 9092
       - 9093
+      - 9094
     ports:
       - "29092:29092"
     networks:
@@ -43,11 +41,10 @@ services:
       - KAFKA_CFG_SASL_ENABLED_MECHANISMS=SCRAM-SHA-256
       - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=SCRAM-SHA-256
 
-      - KAFKA_CERTIFICATE_PASSWORD=supersecret
-      - KAFKA_CLIENT_USERS=user
-      - KAFKA_CLIENT_PASSWORDS=password
-      - KAFKA_INTER_BROKER_USER=admin
-      - KAFKA_INTER_BROKER_PASSWORD=password
+      # - KAFKA_CLIENT_USERS=admin,client
+      # - KAFKA_CLIENT_PASSWORDS=password,password
+      # - KAFKA_CERTIFICATE_PASSWORD=supersecret
+      # - KAFKA_TLS_TYPE=JKS
     volumes:
       - kafka_0_data:/bitnami/kafka
       - ./keystore/kafka-0.server.keystore.jks:/opt/bitnami/kafka/config/certs/kafka.keystore.jks:ro
@@ -83,12 +80,6 @@ services:
       - KAFKA_CFG_SSL_TRUSTSTORE_PASSWORD=supersecret
       - KAFKA_CFG_SASL_ENABLED_MECHANISMS=SCRAM-SHA-256
       - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=SCRAM-SHA-256
-
-      - KAFKA_CERTIFICATE_PASSWORD=supersecret
-      - KAFKA_CLIENT_USERS=user
-      - KAFKA_CLIENT_PASSWORDS=password
-      - KAFKA_INTER_BROKER_USER=admin
-      - KAFKA_INTER_BROKER_PASSWORD=password
     volumes:
       - kafka_1_data:/bitnami/kafka
       - ./keystore/kafka-1.server.keystore.jks:/opt/bitnami/kafka/config/certs/kafka.keystore.jks:ro
@@ -124,12 +115,6 @@ services:
       - KAFKA_CFG_SSL_TRUSTSTORE_PASSWORD=supersecret
       - KAFKA_CFG_SASL_ENABLED_MECHANISMS=SCRAM-SHA-256
       - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=SCRAM-SHA-256
-
-      - KAFKA_CERTIFICATE_PASSWORD=supersecret
-      - KAFKA_CLIENT_USERS=user
-      - KAFKA_CLIENT_PASSWORDS=password
-      - KAFKA_INTER_BROKER_USER=admin
-      - KAFKA_INTER_BROKER_PASSWORD=password
     volumes:
       - kafka_2_data:/bitnami/kafka
       - ./keystore/kafka-2.server.keystore.jks:/opt/bitnami/kafka/config/certs/kafka.keystore.jks:ro
