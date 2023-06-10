@@ -40,18 +40,12 @@ services:
       - KAFKA_CFG_SSL_TRUSTSTORE_PASSWORD=supersecret
       - KAFKA_CFG_SASL_ENABLED_MECHANISMS=SCRAM-SHA-256
       - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=SCRAM-SHA-256
-
-      # - KAFKA_CLIENT_USERS=admin,client
-      # - KAFKA_CLIENT_PASSWORDS=password,password
-      # - KAFKA_CERTIFICATE_PASSWORD=supersecret
-      # - KAFKA_TLS_TYPE=JKS
     volumes:
       - kafka_0_data:/bitnami/kafka
       - ./keystore/kafka-0.server.keystore.jks:/opt/bitnami/kafka/config/certs/kafka.keystore.jks:ro
       - ./truststore/kafka.truststore.jks:/opt/bitnami/kafka/config/certs/kafka.truststore.jks:ro
       - ./kafka_jaas.conf:/opt/bitnami/kafka/config/kafka_jaas.conf:ro
       - ./client.properties:/opt/bitnami/kafka/config/client.properties:ro
-      - ./kafka_client_jaas.conf:/tmp/kafka_client_jaas.conf:ro
     depends_on:
       - zookeeper
   kafka-1:
@@ -86,7 +80,6 @@ services:
       - ./truststore/kafka.truststore.jks:/opt/bitnami/kafka/config/certs/kafka.truststore.jks:ro
       - ./kafka_jaas.conf:/opt/bitnami/kafka/config/kafka_jaas.conf:ro
       - ./client.properties:/opt/bitnami/kafka/config/client.properties:ro
-      - ./kafka_client_jaas.conf:/tmp/kafka_client_jaas.conf:ro
     depends_on:
       - zookeeper
   kafka-2:
@@ -121,7 +114,6 @@ services:
       - ./truststore/kafka.truststore.jks:/opt/bitnami/kafka/config/certs/kafka.truststore.jks:ro
       - ./kafka_jaas.conf:/opt/bitnami/kafka/config/kafka_jaas.conf:ro
       - ./client.properties:/opt/bitnami/kafka/config/client.properties:ro
-      - ./kafka_client_jaas.conf:/tmp/kafka_client_jaas.conf:ro
     depends_on:
       - zookeeper
 
