@@ -46,6 +46,7 @@ services:
       - ./truststore/kafka.truststore.jks:/opt/bitnami/kafka/config/certs/kafka.truststore.jks:ro
       - ./kafka_jaas.conf:/opt/bitnami/kafka/config/kafka_jaas.conf:ro
       - ./client.properties:/opt/bitnami/kafka/config/client.properties:ro
+      - ./command.properties:/opt/bitnami/kafka/config/command.properties:ro
     depends_on:
       - zookeeper
   kafka-1:
@@ -80,6 +81,7 @@ services:
       - ./truststore/kafka.truststore.jks:/opt/bitnami/kafka/config/certs/kafka.truststore.jks:ro
       - ./kafka_jaas.conf:/opt/bitnami/kafka/config/kafka_jaas.conf:ro
       - ./client.properties:/opt/bitnami/kafka/config/client.properties:ro
+      - ./command.properties:/opt/bitnami/kafka/config/command.properties:ro
     depends_on:
       - zookeeper
   kafka-2:
@@ -114,6 +116,7 @@ services:
       - ./truststore/kafka.truststore.jks:/opt/bitnami/kafka/config/certs/kafka.truststore.jks:ro
       - ./kafka_jaas.conf:/opt/bitnami/kafka/config/kafka_jaas.conf:ro
       - ./client.properties:/opt/bitnami/kafka/config/client.properties:ro
+      - ./command.properties:/opt/bitnami/kafka/config/command.properties:ro
     depends_on:
       - zookeeper
 
