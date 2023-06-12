@@ -120,6 +120,9 @@ done
   --allow-principal User:consumer --consumer --group '*' \
   --topic orders --command-config /opt/bitnami/kafka/config/superuser.properties
 
+./kafka-acls.sh --bootstrap-server kafka-1:9094 --list \
+  --topic orders --command-config /opt/bitnami/kafka/config/superuser.properties
+
 #############
 ca-key
 ca-cert
