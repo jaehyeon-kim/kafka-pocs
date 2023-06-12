@@ -23,6 +23,7 @@ https://docs.confluent.io/platform/current/kafka/authentication_ssl.html
 https://docs.confluent.io/platform/current/security/security_tutorial.html#security-tutorial
 https://docs.confluent.io/platform/current/security/security_tutorial.html#generating-keys-certs
 
+############# SSL
 docker exec -it kafka-1 bash
 cd /opt/bitnami/kafka/bin/
 
@@ -41,19 +42,20 @@ product: lemons, quantity: 7
   --topic inventory --consumer.config /opt/bitnami/kafka/config/client.properties \
   --from-beginning
 
-#############
-docker exec -it zookeeper bash
-cd /opt/bitnami/zookeeper/bin/
-./zkCli.sh
-
+############# SASL
 docker exec -it kafka-0 bash
 cd /opt/bitnami/kafka/bin/
 
-./kafka-configs.sh --bootstrap-server kafka-1:9092 --describe --entity-type users
-./kafka-configs.sh --bootstrap-server kafka-1:9092 --alter \
-  --add-config 'SCRAM-SHA-256=[iterations=8192,password=password]' \
-  --entity-type users --entity-name client
+## create sasl user
+./kafka-configs.sh --bootstrap-server kafka-1:9093 --describe \
+  --entity-type users --command-config /opt/bitnami/kafka/config/command.properties
 
+./kafka-configs.sh --bootstrap-server kafka-1:9093 --alter \
+  --add-config 'SCRAM-SHA-256=[iterations=8192,password=password]' \
+  --entity-type users --entity-name client \
+  --command-config /opt/bitnami/kafka/config/command.properties
+
+## produce/consume messages
 ./kafka-console-producer.sh --bootstrap-server kafka-1:9094 \
   --topic inventory --producer.config /opt/bitnami/kafka/config/client.properties
 product: apples, quantity: 5
@@ -62,6 +64,61 @@ product: lemons, quantity: 7
 ./kafka-console-consumer.sh --bootstrap-server kafka-1:9094 \
   --topic inventory --consumer.config /opt/bitnami/kafka/config/client.properties \
   --from-beginning
+
+############# SASL + Authorization
+docker exec -it kafka-0 bash
+cd /opt/bitnami/kafka/bin/
+
+## create sasl user
+./kafka-configs.sh --bootstrap-server kafka-1:9093 --describe \
+  --entity-type users --command-config /opt/bitnami/kafka/config/command.properties
+
+for USER in "superuser" "client"; do
+  echo $USER
+  ./kafka-configs.sh --bootstrap-server kafka-1:9093 --alter \
+    --add-config 'SCRAM-SHA-256=[iterations=8192,password=password]' \
+    --entity-type users --entity-name $USER \
+    --command-config /opt/bitnami/kafka/config/command.properties
+done
+
+## create ACL rules
+./kafka-acls.sh --bootstrap-server kafka-1:9094 --add \
+  --allow-principal User:client --operation All --group '*' \
+  --topic inventory --command-config /opt/bitnami/kafka/config/superuser.properties
+
+./kafka-acls.sh --bootstrap-server kafka-1:9094 --list \
+  --topic inventory --command-config /opt/bitnami/kafka/config/superuser.properties
+
+## create topic
+./kafka-topics.sh --bootstrap-server kafka-1:9094 --create \
+  --topic inventory --command-config /opt/bitnami/kafka/config/client.properties
+
+## produce/consume messages
+./kafka-console-producer.sh --bootstrap-server kafka-1:9094 \
+  --topic inventory --producer.config /opt/bitnami/kafka/config/client.properties
+product: apples, quantity: 5
+product: lemons, quantity: 7
+
+./kafka-console-consumer.sh --bootstrap-server kafka-1:9094 \
+  --topic inventory --consumer.config /opt/bitnami/kafka/config/client.properties \
+  --from-beginning
+
+## python examples
+for USER in "producer" "consumer"; do
+  echo $USER
+  ./kafka-configs.sh --bootstrap-server kafka-1:9094 --alter \
+    --add-config 'SCRAM-SHA-256=[iterations=8192,password=password]' \
+    --entity-type users --entity-name $USER \
+    --command-config /opt/bitnami/kafka/config/superuser.properties
+done
+
+./kafka-acls.sh --bootstrap-server kafka-1:9094 --add \
+  --allow-principal User:producer --producer \
+  --topic orders --command-config /opt/bitnami/kafka/config/superuser.properties
+
+./kafka-acls.sh --bootstrap-server kafka-1:9094 --add \
+  --allow-principal User:consumer --consumer --group '*' \
+  --topic orders --command-config /opt/bitnami/kafka/config/superuser.properties
 
 #############
 ca-key
@@ -104,3 +161,6 @@ https://supergloo.com/kafka-tutorials/kafka-authentication/
 
 https://devidea.tistory.com/102
 https://developer.ibm.com/tutorials/kafka-authn-authz/
+https://yang1s.tistory.com/17
+
+https://docs.confluent.io/platform/current/kafka/authorization.html
