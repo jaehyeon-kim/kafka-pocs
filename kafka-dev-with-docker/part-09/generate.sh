@@ -73,7 +73,7 @@ while read -r KAFKA_HOST || [ -n "$KAFKA_HOST" ]; do
     -alias localhost -file $KEYSTORE_SIGN_REQUEST -keypass $PASSWORD -storepass $PASSWORD
  
   echo
-  echo "Now the trust store's private key (CA) will sign the keystore's certificate."
+  echo "Now the private key of the certificate authority (CA) will sign the keystore's certificate."
   openssl x509 -req -CA $CA_WORKING_DIRECTORY/$CA_CERT_FILE \
     -CAkey $CA_WORKING_DIRECTORY/$CA_KEY_FILE \
     -in $KEYSTORE_SIGN_REQUEST -out $KEYSTORE_SIGNED_CERT \
