@@ -24,7 +24,6 @@ class Consumer:
             ssl_cafile="pem/ca-root.pem",
             ssl_certfile="pem/client-certificate.pem",
             ssl_keyfile="pem/client-private-key.pem",
-            ssl_password=os.environ["SSL_PASSWORD"],
             auto_offset_reset="earliest",
             enable_auto_commit=True,
             group_id=self.group_id,

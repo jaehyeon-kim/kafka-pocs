@@ -22,7 +22,6 @@ class Consumer:
             security_protocol="SSL",
             ssl_check_hostname=True,
             ssl_cafile="pem/ca-root.pem",
-            ssl_password=os.environ["SSL_PASSWORD"],
             auto_offset_reset="earliest",
             enable_auto_commit=True,
             group_id=self.group_id,

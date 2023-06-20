@@ -53,7 +53,6 @@ class Producer:
             security_protocol="SASL_SSL",
             ssl_check_hostname=True,
             ssl_cafile="pem/ca-root.pem",
-            ssl_password=os.environ["SSL_PASSWORD"],
             sasl_mechanism="SCRAM-SHA-256",
             sasl_plain_username=os.environ["SASL_USERNAME"],
             sasl_plain_password=os.environ["SASL_PASSWORD"],

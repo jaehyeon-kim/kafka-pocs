@@ -55,7 +55,6 @@ class Producer:
             ssl_cafile="pem/ca-root.pem",
             ssl_certfile="pem/client-certificate.pem",
             ssl_keyfile="pem/client-private-key.pem",
-            ssl_password=os.environ["SSL_PASSWORD"],
             value_serializer=lambda v: json.dumps(v, default=self.serialize).encode("utf-8"),
             key_serializer=lambda v: json.dumps(v, default=self.serialize).encode("utf-8"),
         )

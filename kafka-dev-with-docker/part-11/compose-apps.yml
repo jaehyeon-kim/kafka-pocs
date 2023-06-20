@@ -11,7 +11,6 @@ services:
       BOOTSTRAP_SERVERS: kafka-0:9094,kafka-1:9094,kafka-2:9094
       TOPIC_NAME: orders
       TZ: Australia/Sydney
-      SSL_PASSWORD: supersecret
       SASL_USERNAME: producer
       SASL_PASSWORD: password
     volumes:
@@ -27,7 +26,6 @@ services:
       TOPIC_NAME: orders
       GROUP_ID: orders-group
       TZ: Australia/Sydney
-      SSL_PASSWORD: supersecret
       SASL_USERNAME: consumer
       SASL_PASSWORD: password
     volumes:
