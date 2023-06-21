@@ -69,17 +69,27 @@ product: lemons, quantity: 7
 docker exec -it kafka-0 bash
 cd /opt/bitnami/kafka/bin/
 
-## create sasl user
+## create sasl users
 ./kafka-configs.sh --bootstrap-server kafka-1:9093 --describe \
   --entity-type users --command-config /opt/bitnami/kafka/config/command.properties
 
-for USER in "superuser" "client"; do
+# super user
+./kafka-configs.sh --bootstrap-server kafka-1:9093 --alter \
+  --add-config 'SCRAM-SHA-256=[iterations=8192,password=password]' \
+  --entity-type users --entity-name superuser \
+  --command-config /opt/bitnami/kafka/config/command.properties
+
+# client users
+for USER in "client" "producer" "consumer"; do
   echo $USER
-  ./kafka-configs.sh --bootstrap-server kafka-1:9093 --alter \
+  ./kafka-configs.sh --bootstrap-server kafka-1:9094 --alter \
     --add-config 'SCRAM-SHA-256=[iterations=8192,password=password]' \
     --entity-type users --entity-name $USER \
-    --command-config /opt/bitnami/kafka/config/command.properties
+    --command-config /opt/bitnami/kafka/config/superuser.properties
 done
+
+./kafka-configs.sh --bootstrap-server kafka-1:9094 --describe \
+  --entity-type users --command-config /opt/bitnami/kafka/config/superuser.properties
 
 ## create ACL rules
 ./kafka-acls.sh --bootstrap-server kafka-1:9094 --add \
@@ -88,29 +98,6 @@ done
 
 ./kafka-acls.sh --bootstrap-server kafka-1:9094 --list \
   --topic inventory --command-config /opt/bitnami/kafka/config/superuser.properties
-
-## create topic
-./kafka-topics.sh --bootstrap-server kafka-1:9094 --create \
-  --topic inventory --command-config /opt/bitnami/kafka/config/client.properties
-
-## produce/consume messages
-./kafka-console-producer.sh --bootstrap-server kafka-1:9094 \
-  --topic inventory --producer.config /opt/bitnami/kafka/config/client.properties
-product: apples, quantity: 5
-product: lemons, quantity: 7
-
-./kafka-console-consumer.sh --bootstrap-server kafka-1:9094 \
-  --topic inventory --consumer.config /opt/bitnami/kafka/config/client.properties \
-  --from-beginning
-
-## python examples
-for USER in "producer" "consumer"; do
-  echo $USER
-  ./kafka-configs.sh --bootstrap-server kafka-1:9094 --alter \
-    --add-config 'SCRAM-SHA-256=[iterations=8192,password=password]' \
-    --entity-type users --entity-name $USER \
-    --command-config /opt/bitnami/kafka/config/superuser.properties
-done
 
 ./kafka-acls.sh --bootstrap-server kafka-1:9094 --add \
   --allow-principal User:producer --producer \
@@ -122,6 +109,20 @@ done
 
 ./kafka-acls.sh --bootstrap-server kafka-1:9094 --list \
   --topic orders --command-config /opt/bitnami/kafka/config/superuser.properties
+
+## create topic
+# ./kafka-topics.sh --bootstrap-server kafka-1:9094 --create \
+#   --topic inventory --command-config /opt/bitnami/kafka/config/client.properties
+
+## produce/consume messages
+./kafka-console-producer.sh --bootstrap-server kafka-1:9094 \
+  --topic inventory --producer.config /opt/bitnami/kafka/config/client.properties
+product: apples, quantity: 5
+product: lemons, quantity: 7
+
+./kafka-console-consumer.sh --bootstrap-server kafka-1:9094 \
+  --topic inventory --consumer.config /opt/bitnami/kafka/config/client.properties \
+  --from-beginning
 
 #############
 ca-key
