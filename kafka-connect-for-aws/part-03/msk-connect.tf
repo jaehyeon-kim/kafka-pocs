@@ -100,21 +100,9 @@ resource "aws_mskconnect_custom_plugin" "camel_ddb_sink" {
 resource "aws_s3_object" "camel_ddb_sink" {
   bucket = aws_s3_bucket.default_bucket.id
   key    = "plugins/camel-aws-ddb-sink-kafka-connector.zip"
-  source = "plugins/camel-aws-ddb-sink-kafka-connector.zip"
-
-  depends_on = [aws_s3_object_copy.camel_ddb_sink]
-}
-
-resource "aws_s3_object_copy" "camel_ddb_sink" {
-  bucket = aws_s3_bucket.default_bucket.id
-  key    = "plugins/camel-aws-ddb-sink-kafka-connector.zip"
   source = "connectors/camel-aws-ddb-sink-kafka-connector.zip"
 
-  grant {
-    uri         = "http://acs.amazonaws.com/groups/global/AllUsers"
-    type        = "Group"
-    permissions = ["READ"]
-  }
+  etag = filemd5("connectors/camel-aws-ddb-sink-kafka-connector.zip")
 }
 
 resource "aws_cloudwatch_log_group" "camel_ddb_sink" {
@@ -223,21 +211,9 @@ resource "aws_mskconnect_custom_plugin" "msk_data_generator" {
 resource "aws_s3_object" "msk_data_generator" {
   bucket = aws_s3_bucket.default_bucket.id
   key    = "plugins/msk-data-generator.jar"
-  source = "plugins/msk-data-generator.jar"
-
-  depends_on = [aws_s3_object_copy.msk_data_generator]
-}
-
-resource "aws_s3_object_copy" "msk_data_generator" {
-  bucket = aws_s3_bucket.default_bucket.id
-  key    = "plugins/msk-data-generator.jar"
   source = "connectors/msk-data-generator.jar"
 
-  grant {
-    uri         = "http://acs.amazonaws.com/groups/global/AllUsers"
-    type        = "Group"
-    permissions = ["READ"]
-  }
+  etag = filemd5("connectors/msk-data-generator.jar")
 }
 
 resource "aws_cloudwatch_log_group" "msk_data_generator" {
