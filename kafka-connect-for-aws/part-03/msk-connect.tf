@@ -254,16 +254,6 @@ resource "aws_iam_policy" "kafka_connector_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid = "LoggingPermission"
-        Action = [
-          "logs:CreateLogStream",
-          "logs:CreateLogGroup",
-          "logs:PutLogEvents"
-        ]
-        Effect   = "Allow"
-        Resource = "${aws_cloudwatch_log_group.msk_cluster_lg.arn}*"
-      },
-      {
         Sid = "PermissionOnCluster"
         Action = [
           "kafka-cluster:Connect",
@@ -303,6 +293,16 @@ resource "aws_iam_policy" "kafka_connector_policy" {
           "${aws_s3_bucket.default_bucket.arn}",
           "${aws_s3_bucket.default_bucket.arn}/*"
         ]
+      },
+      {
+        Sid = "LoggingPermission"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:CreateLogGroup",
+          "logs:PutLogEvents"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
       },
     ]
   })
