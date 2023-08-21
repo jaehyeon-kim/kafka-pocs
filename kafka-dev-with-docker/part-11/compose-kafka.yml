@@ -82,7 +82,6 @@ services:
       - KAFKA_CFG_AUTHORIZER_CLASS_NAME=kafka.security.authorizer.AclAuthorizer
       - KAFKA_CFG_SUPER_USERS=User:superuser
       - KAFKA_CFG_ALLOW_EVERYONE_IF_NO_ACL_FOUND=true
-      - ./superuser.properties:/opt/bitnami/kafka/config/superuser.properties:ro
     volumes:
       - kafka_1_data:/bitnami/kafka
       - ./keystore/kafka-1.server.keystore.jks:/opt/bitnami/kafka/config/certs/kafka.keystore.jks:ro
@@ -90,6 +89,7 @@ services:
       - ./kafka_jaas.conf:/opt/bitnami/kafka/config/kafka_jaas.conf:ro
       - ./client.properties:/opt/bitnami/kafka/config/client.properties:ro
       - ./command.properties:/opt/bitnami/kafka/config/command.properties:ro
+      - ./superuser.properties:/opt/bitnami/kafka/config/superuser.properties:ro
     depends_on:
       - zookeeper
   kafka-2:
