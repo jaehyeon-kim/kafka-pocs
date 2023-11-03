@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: order-producer
+  name: order-producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-producer
+  template:
+    metadata:
+      labels:
+        app: order-producer
+    spec:
+      containers:
+        - image: order-clients:0.1.0
+          name: producer-container
+          args: ["python", "producer.py"]
+          env:
+            - name: BOOTSTRAP_SERVERS
+              value: kafka-0.kafka:9092
+            - name: TOPIC_NAME
+              value: orders
+            - name: TZ
+              value: Australia/Sydney
+          resources: {}
+          imagePullPolicy: Never # shouldn't be Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: order-consumer
+  name: order-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-consumer
+  template:
+    metadata:
+      labels:
+        app: order-consumer
+    spec:
+      containers:
+        - image: order-clients:0.1.0
+          name: consumer-container
+          args: ["python", "consumer.py"]
+          env:
+            - name: BOOTSTRAP_SERVERS
+              value: kafka-0.kafka:9092
+            - name: TOPIC_NAME
+              value: orders
+            - name: GROUP_ID
+              value: orders-group
+            - name: TZ
+              value: Australia/Sydney
+          resources: {}
+          imagePullPolicy: Never
