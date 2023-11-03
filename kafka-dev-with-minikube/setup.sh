@@ -16,7 +16,42 @@ kubectl patch storageclass csi-hostpath-sc -p '{"metadata": {"annotations":{"sto
 
 kubectl create -f manifests/kafka-cluster.yml
 
+kubectl create -f - <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  labels:
+    app: kafka
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local
+  ports:
+    - port: 9092
+      name: internal
+  selector:
+    app: kafka
+EOF
+
+kubectl create -f - <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-ext
+  labels:
+    app: kafka
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 29092
+      name: external
+  selector:
+    app: kafka
+EOF
+
 kubectl run dns-test --image busybox:1.28 --rm -it --restart=Never
+
+nslookup kafka-0.kafka:9092
 
 kubectl run producer --image=bitnami/kafka:2.8.1 --rm -it --restart=Never \
   -- /opt/bitnami/kafka/bin/kafka-console-producer.sh --bootstrap-server kafka-0.kafka:9092 --topic my-topic
@@ -25,6 +60,8 @@ kubectl run consumer --image=bitnami/kafka:2.8.1 --rm -it --restart=Never \
   -- /opt/bitnami/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka-0.kafka:9092 --topic my-topic --from-beginning
 
 minikube service kafka-ui --url
+
+minikube service kafka --url
 
 kubectl delete -f manifests/kafka-cluster.yml \
   && kubectl delete pvc kafka-data-kafka-0 \
@@ -46,6 +83,8 @@ kubectl create -f manifests/kafka-clients.yml
 minikube service kafka-ui --url
 
 kubectl delete -f manifests/kafka-clients.yml
+
+BOOTSTRAP_SERVERS=127.0.0.1:29092 python clients/producer.py
 
 ####
 #### Kafka Connect

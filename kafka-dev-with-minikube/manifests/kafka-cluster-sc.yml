@@ -40,81 +40,19 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: kafka-ext
+  name: kafka
   labels:
     app: kafka
 spec:
+  # externalTrafficPolicy: Local
   type: LoadBalancer
   ports:
+    - port: 9092
+      name: internal
     - port: 29092
       name: external
   selector:
     app: kafka
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: kafka
-  labels:
-    app: kafka
-spec:
-  ports:
-    - port: 9092
-      name: internal
-  selector:
-    app: kafka
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: kafka
-  name: kafka
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: kafka
-  template:
-    metadata:
-      labels:
-        app: kafka
-    spec:
-      containers:
-        - image: bitnami/kafka:2.8.1
-          name: kafka-container
-          ports:
-            - containerPort: 2181
-          env:
-            - name: ALLOW_PLAINTEXT_LISTENER
-              value: "yes"
-            - name: KAFKA_CFG_ZOOKEEPER_CONNECT
-              value: zookeeper:2181
-            - name: POD_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
-            - name: KAFKA_CFG_BROKER_ID
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.labels['apps.kubernetes.io/pod-index']
-            - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
-              value: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-            - name: KAFKA_CFG_LISTENERS
-              value: INTERNAL://:9092,EXTERNAL://:29092
-            - name: KAFKA_CFG_ADVERTISED_LISTENERS
-              value: INTERNAL://kafka:9092,EXTERNAL://kafka:29092
-            - name: KAFKA_CFG_INTER_BROKER_LISTENER_NAME
-              value: INTERNAL
-            - name: KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE
-              value: "true"
-            - name: KAFKA_CFG_DELETE_TOPIC_ENABLE
-              value: "true"
-            - name: KAFKA_CFG_NUM_PARTITIONS
-              value: "3"
-            - name: KAFKA_CFG_DEFAULT_REPLICATION_FACTOR
-              value: "1"
-          resources: {}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
