@@ -1,3 +1,8 @@
+https://strimzi.io/docs/operators/0.27.1/using
+https://strimzi.io/docs/operators/0.27.1/overview
+https://strimzi.io/docs/operators/0.27.1/quickstart
+https://strimzi.io/downloads/
+
 minikube start --cpus='max' --memory=10240 --addons=metrics-server --kubernetes-version=v1.24.7
 
 kubectl create ns kafka
