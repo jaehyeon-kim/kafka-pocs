@@ -9,7 +9,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: strimzi-cluster-operator
-    namespace: kafka
+    namespace: default
 roleRef:
   kind: ClusterRole
   name: strimzi-entity-operator
@@ -432,7 +432,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: strimzi-cluster-operator
-    namespace: kafka
+    namespace: default
 roleRef:
   kind: ClusterRole
   name: strimzi-kafka-broker
@@ -485,7 +485,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: strimzi-cluster-operator
-    namespace: kafka
+    namespace: default
 roleRef:
   kind: ClusterRole
   name: strimzi-cluster-operator-namespaced
@@ -14432,7 +14432,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: strimzi-cluster-operator
-    namespace: kafka
+    namespace: default
 roleRef:
   kind: ClusterRole
   name: strimzi-cluster-operator-global
@@ -14491,7 +14491,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: strimzi-cluster-operator
-    namespace: kafka
+    namespace: default
 roleRef:
   kind: ClusterRole
   name: strimzi-kafka-client

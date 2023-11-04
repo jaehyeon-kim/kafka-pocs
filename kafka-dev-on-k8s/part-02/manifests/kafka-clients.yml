@@ -20,7 +20,7 @@ spec:
           args: ["python", "producer.py"]
           env:
             - name: BOOTSTRAP_SERVERS
-              value: kafka-0.kafka:9092
+              value: demo-cluster-kafka-bootstrap:9092
             - name: TOPIC_NAME
               value: orders
             - name: TZ
@@ -50,7 +50,7 @@ spec:
           args: ["python", "consumer.py"]
           env:
             - name: BOOTSTRAP_SERVERS
-              value: kafka-0.kafka:9092
+              value: demo-cluster-kafka-bootstrap:9092
             - name: TOPIC_NAME
               value: orders
             - name: GROUP_ID

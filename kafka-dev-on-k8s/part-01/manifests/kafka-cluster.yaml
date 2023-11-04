@@ -1,0 +1,38 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: demo-cluster
+spec:
+  kafka:
+    replicas: 2
+    version: 2.8.1
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      - name: external
+        port: 29092
+        type: nodeport
+        tls: false
+    storage:
+      type: jbod
+      volumes:
+        - id: 0
+          type: persistent-claim
+          size: 20Gi
+          deleteClaim: true
+    config:
+      inter.broker.protocol.version: 2.8
+      auto.create.topics.enable: "true"
+      num.partitions: 3
+      default.replication.factor: 2
+  zookeeper:
+    replicas: 1
+    storage:
+      type: persistent-claim
+      size: 10Gi
+      deleteClaim: true
+  # entityOperator:
+  #   topicOperator: {}
+  #   userOperator: {}
