@@ -48,7 +48,7 @@ class Consumer:
 
 if __name__ == "__main__":
     consumer = Consumer(
-        bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS", "localhost:29092").split(","),
+        bootstrap_servers=os.environ["BOOTSTRAP_SERVERS"].split(","),
         topics=os.getenv("TOPIC_NAME", "orders").split(","),
         group_id=os.getenv("GROUP_ID", "orders-group"),
     )

@@ -1,14 +1,6 @@
 ## create minikube cluster
 minikube start --cpus='max' --memory=10240 --addons=metrics-server --kubernetes-version=v1.24.7
 
-# dynamic volume provisioning
-# https://minikube.sigs.k8s.io/docs/tutorials/volume_snapshots_and_csi/
-minikube addons enable volumesnapshots
-minikube addons enable csi-hostpath-driver
-minikube addons disable storage-provisioner
-minikube addons disable default-storageclass
-kubectl patch storageclass csi-hostpath-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
-
 ## download and deploy strimzi oeprator
 STRIMZI_VERSION="0.27.1"
 DOWNLOAD_URL=https://github.com/strimzi/strimzi-kafka-operator/releases/download/$STRIMZI_VERSION/strimzi-cluster-operator-$STRIMZI_VERSION.yaml
@@ -24,12 +16,23 @@ kubectl create -f manifests/kafka-ui.yaml
 minikube service kafka-ui --url
 minikube service demo-cluster-kafka-external-bootstrap --url
 
-BOOTSTRAP_SERVERS=127.0.0.1:38799 python clients/producer.py
+BOOTSTRAP_SERVERS=127.0.0.1:33267 python clients/producer.py
+BOOTSTRAP_SERVERS=127.0.0.1:33267 python clients/consumer.py
 
 ## deploy
 # use docker daemon inside minikube cluster
 eval $(minikube docker-env)
+# Host added: /home/jaehyeon/.ssh/known_hosts ([127.0.0.1]:32772)
 
 docker build -t=order-clients:0.1.0 clients/.
 
 kubectl create -f manifests/kafka-clients.yml
+
+## delete resources
+kubectl delete -f manifests/kafka-cluster.yaml
+kubectl delete -f manifests/kafka-clients.yml
+kubectl delete -f manifests/kafka-ui.yaml
+kubectl delete -f manifests/strimzi-cluster-operator-$STRIMZI_VERSION.yaml
+
+## delete minikube
+minikube delete
