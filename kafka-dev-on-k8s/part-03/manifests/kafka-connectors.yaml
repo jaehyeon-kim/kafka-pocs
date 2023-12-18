@@ -7,7 +7,7 @@ metadata:
     strimzi.io/cluster: demo-connect
 spec:
   class: com.amazonaws.mskdatagen.GeneratorSourceConnector
-  tasksMax: 2
+  tasksMax: 1
   config:
     ##
     key.converter: org.apache.kafka.connect.storage.StringConverter
@@ -15,11 +15,11 @@ spec:
     value.converter: org.apache.kafka.connect.json.JsonConverter
     value.converter.schemas.enable: false
     ##
-    genkp.customer.with: #{Code.isbn10}
-    genv.customer.name.with: #{Name.full_name}
-    genkp.order.with: #{Internet.uuid}
-    genv.order.product_id.with: #{number.number_between '101''109'}
-    genv.order.quantity.with: #{number.number_between '1''5'}
+    genkp.customer.with: "#{Code.isbn10}"
+    genv.customer.name.with: "#{Name.full_name}"
+    genkp.order.with: "#{Internet.uuid}"
+    genv.order.product_id.with: "#{number.number_between '101''109'}"
+    genv.order.quantity.with: "#{number.number_between '1''5'}"
     genv.order.customer_id.matching: customer.key
     global.throttle.ms: 500
     global.history.records.max: 1000
@@ -32,7 +32,7 @@ metadata:
     strimzi.io/cluster: demo-connect
 spec:
   class: io.confluent.connect.s3.S3SinkConnector
-  tasksMax: 2
+  tasksMax: 1
   config:
     ##
     key.converter: org.apache.kafka.connect.storage.StringConverter
@@ -43,7 +43,7 @@ spec:
     storage.class: io.confluent.connect.s3.storage.S3Storage
     format.class: io.confluent.connect.s3.format.json.JsonFormat
     topics: order,customer
-    s3.bucket.name: kafka-dev-on-k8s
+    s3.bucket.name: kafka-dev-on-k8s-ap-southeast-2
     s3.region: ap-southeast-2
     flush.size: 100
     rotate.schedule.interval.ms: 60000

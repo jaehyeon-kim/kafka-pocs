@@ -1,4 +1,3 @@
 -r clients/requirements.txt
-black
 pytest
 pytest-cov
