@@ -5,15 +5,10 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.tabSize": 2,
-  "python.linting.pylintEnabled": false,
-  "python.linting.flake8Enabled": false,
-  "python.linting.enabled": true,
-  "python.formatting.provider": "black",
-  "python.formatting.blackPath": "black",
-  "python.formatting.blackArgs": ["--line-length", "100"],
   "[python]": {
     "editor.tabSize": 4,
-    "editor.defaultFormatter": "ms-python.python"
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff"
   },
   "[terraform]": {
     "editor.defaultFormatter": "hashicorp.terraform",
@@ -49,5 +44,10 @@
     "!Sub scalar",
     "!Transform mapping",
     "!Ref scalar"
-  ]
+  ],
+  "[terraform][terraform-vars]": {
+    "editor.codeActionsOnSave": {
+      "source.formatAll.terraform": "explicit"
+    }
+  }
 }

@@ -10,13 +10,13 @@ ccdak/security/certs
 ccdak/security/keystore
 ccdak/security/truststore
 glue-schema-registry/app/consumer/evt.py
-kafka-dev-with-docker/*/connectors
-kafka-connect-for-aws/*/connectors
+**/connectors
 kafka-dev-with-docker/*/plugins
 certificate-authority
 truststore
 keystore
 kafkaui-glue-serde-*-jar-with-dependencies.jar
+kpow.env
 
 ## sam
 .aws-sam*

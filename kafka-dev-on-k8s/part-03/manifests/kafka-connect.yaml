@@ -1,0 +1,50 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: demo-connect
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  version: 2.8.1
+  replicas: 2
+  bootstrapServers: demo-cluster-kafka-bootstrap:9092
+  config:
+    group.id: demo-connect
+    offset.storage.topic: demo-connect-offsets
+    config.storage.topic: demo-connect-configs
+    status.storage.topic: demo-connect-status
+    # -1 means it will use the default replication factor configured in the broker
+    config.storage.replication.factor: -1
+    offset.storage.replication.factor: -1
+    status.storage.replication.factor: -1
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: false
+    value.converter.schemas.enable: false
+  externalConfiguration:
+    env:
+      - name: AWS_ACCESS_KEY_ID
+        valueFrom:
+          secretKeyRef:
+            name: awscred
+            key: AWS_ACCESS_KEY_ID
+      - name: AWS_SECRET_ACCESS_KEY
+        valueFrom:
+          secretKeyRef:
+            name: awscred
+            key: AWS_SECRET_ACCESS_KEY
+  build:
+    output:
+      type: docker
+      image: jaehyeon/demo-connect:latest
+      pushSecret: regcred
+    # https://strimzi.io/docs/operators/0.27.1/using#plugins
+    plugins:
+      - name: confluentinc-kafka-connect-s3
+        artifacts:
+          - type: zip
+            url: https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-s3/versions/10.4.3/confluentinc-kafka-connect-s3-10.4.3.zip
+      - name: msk-data-generator
+        artifacts:
+          - type: jar
+            url: https://github.com/awslabs/amazon-msk-data-generator/releases/download/v0.4.0/msk-data-generator-0.4-jar-with-dependencies.jar
