@@ -16,8 +16,8 @@ kubectl create -f manifests/kafka-ui.yaml
 minikube service kafka-ui --url
 minikube service demo-cluster-kafka-external-bootstrap --url
 
-BOOTSTRAP_SERVERS=127.0.0.1:33267 python clients/producer.py
-BOOTSTRAP_SERVERS=127.0.0.1:33267 python clients/consumer.py
+BOOTSTRAP_SERVERS=127.0.0.1:42289 python clients/producer.py
+BOOTSTRAP_SERVERS=127.0.0.1:42289 python clients/consumer.py
 
 ## deploy
 # use docker daemon inside minikube cluster
