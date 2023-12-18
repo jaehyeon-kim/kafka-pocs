@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   labels:
     app: order-producer
+    group: client
   name: order-producer
 spec:
   replicas: 1
@@ -13,6 +14,7 @@ spec:
     metadata:
       labels:
         app: order-producer
+        group: client
     spec:
       containers:
         - image: order-clients:0.1.0
@@ -33,6 +35,7 @@ kind: Deployment
 metadata:
   labels:
     app: order-consumer
+    group: client
   name: order-consumer
 spec:
   replicas: 1
@@ -43,6 +46,7 @@ spec:
     metadata:
       labels:
         app: order-consumer
+        group: client
     spec:
       containers:
         - image: order-clients:0.1.0
