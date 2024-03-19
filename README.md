@@ -13,13 +13,13 @@
 - Kafka Development with Docker
   - Apache Kafka is one of the key technologies for [modern data streaming architectures](https://docs.aws.amazon.com/whitepapers/latest/build-modern-data-streaming-analytics-architectures/build-modern-data-streaming-analytics-architectures.html) on AWS. Developing and testing Kafka-related applications can be easier using [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/). In this series of posts, I will demonstrate reference implementations of those applications in Dockerized environments.
     - [Part 1 Cluster Setup](https://jaehyeon.me/blog/2023-05-04-kafka-development-with-docker-part-1/)
-    - Part 2 Management App
-    - Part 3 Kafka Connect
-    - Part 4 Produce/Consume Messages
-    - Part 5 Glue Schema Registry
-    - Part 6 Kafka Connect with Glue Schema Registry
-    - Part 7 Produce/Consume Messages with Glue Schema Registry
-    - Part 8 SSL Encryption
-    - Part 9 SSL Authentication
-    - Part 10 SASL Authentication
-    - Part 11 Kafka Authorization
+    - [Part 2 Management App](https://jaehyeon.me/blog/2023-05-18-kafka-development-with-docker-part-2)
+    - [Part 3 Kafka Connect](https://jaehyeon.me/blog/2023-05-25-kafka-development-with-docker-part-3)
+    - [Part 4 Produce/Consume Messages](https://jaehyeon.me/blog/2023-06-01-kafka-development-with-docker-part-4)
+    - [Part 5 Glue Schema Registry](https://jaehyeon.me/blog/2023-06-08-kafka-development-with-docker-part-5)
+    - [Part 6 Kafka Connect with Glue Schema Registry](https://jaehyeon.me/blog/2023-06-15-kafka-development-with-docker-part-6)
+    - [Part 7 Produce/Consume Messages with Glue Schema Registry](https://jaehyeon.me/blog/2023-06-22-kafka-development-with-docker-part-7)
+    - [Part 8 SSL Encryption](https://jaehyeon.me/blog/2023-06-29-kafka-development-with-docker-part-8)
+    - [Part 9 SSL Authentication](https://jaehyeon.me/blog/2023-07-06-kafka-development-with-docker-part-9)
+    - [Part 10 SASL Authentication](https://jaehyeon.me/blog/2023-07-13-kafka-development-with-docker-part-10)
+    - [Part 11 Kafka Authorization](https://jaehyeon.me/blog/2023-07-20-kafka-development-with-docker-part-11)
