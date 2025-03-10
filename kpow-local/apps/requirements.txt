@@ -1,1 +1,2 @@
 confluent_kafka
+types-confluent-kafka
