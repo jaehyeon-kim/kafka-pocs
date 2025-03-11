@@ -3,7 +3,7 @@ import os
 from confluent_kafka import Producer
 from confluent_kafka.admin import AdminClient
 
-from basic_admin import topic_exists, create_topic, get_max_size, set_max_size
+from admin_src import topic_exists, create_topic, get_max_size, set_max_size
 
 BOOTSTRAP_SERVERS = os.getenv("BOOTSTRAP_SERVERS", "localhost:9092")
 TOPIC_NAME = os.getenv("TOPIC_NAME", "basic-client")
