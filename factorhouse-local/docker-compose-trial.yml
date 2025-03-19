@@ -1,4 +1,4 @@
-version: '2.1'
+version: "2.1"
 
 services:
   schema:
@@ -56,7 +56,7 @@ services:
       - "3000:3000"
     depends_on:
       connect:
-       condition: service_healthy
+        condition: service_healthy
     env_file:
       - resources/kpow/local-trial.env
     mem_limit: 2G
@@ -82,8 +82,10 @@ services:
       KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka-1:19092,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
-      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
       KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: "false"
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+      KAFKA_NUM_PARTITIONS: "3"
+      KAFKA_DEFAULT_REPLICATION_FACTOR: "3"
     depends_on:
       - zookeeper
 
@@ -99,6 +101,8 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
       KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: "false"
       KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+      KAFKA_NUM_PARTITIONS: "3"
+      KAFKA_DEFAULT_REPLICATION_FACTOR: "3"
     depends_on:
       - zookeeper
 
@@ -114,5 +118,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
       KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: "false"
       KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+      KAFKA_NUM_PARTITIONS: "3"
+      KAFKA_DEFAULT_REPLICATION_FACTOR: "3"
     depends_on:
       - zookeeper
