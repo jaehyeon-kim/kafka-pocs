@@ -1,0 +1,2 @@
+-r kafka-apps/requirements.txt
+-r flink-apps/requirements.txt

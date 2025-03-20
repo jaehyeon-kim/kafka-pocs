@@ -2,3 +2,4 @@
 .DS_Store
 /resources/connect/
 /resources/kpow/*.env
+/resources/flex/*.env
