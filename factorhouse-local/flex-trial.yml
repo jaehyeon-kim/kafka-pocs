@@ -9,12 +9,10 @@ services:
     command: jobmanager
     container_name: jobmanager
     ports:
-      - "8081:8081"
+      - "8082:8081"
     networks:
       - factorhouse
     environment:
-      - BOOTSTRAP_SERVERS=kafka-0:9092
-      - RUNTIME_ENV=docker
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
@@ -114,7 +112,7 @@ services:
     pull_policy: always
     restart: always
     ports:
-      - "3000:3000"
+      - "3001:3000"
     networks:
       - factorhouse
     depends_on:

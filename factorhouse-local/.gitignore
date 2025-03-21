@@ -3,3 +3,4 @@
 /resources/connect/
 /resources/kpow/*.env
 /resources/flex/*.env
+/flink-apps/jars/*.jar
