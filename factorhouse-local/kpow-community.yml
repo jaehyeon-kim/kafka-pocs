@@ -1,8 +1,9 @@
-version: '2.1'
+version: "2.1"
 
 services:
   schema:
     image: confluentinc/cp-schema-registry:7.8.0
+    container_name: schema-registry
     ports:
       - "8081:8081"
     depends_on:
@@ -50,13 +51,14 @@ services:
 
   kpow:
     image: factorhouse/kpow-ce:latest
+    container_name: kpow
     pull_policy: always
     restart: always
     ports:
       - "3000:3000"
     depends_on:
       connect:
-       condition: service_healthy
+        condition: service_healthy
     env_file:
       - resources/kpow/local-community.env
     mem_limit: 2G
@@ -71,6 +73,7 @@ services:
 
   kafka-1:
     image: confluentinc/cp-kafka:7.8.0
+    container_name: kafka-1
     ports:
       - "9092:9092"
     environment:
@@ -86,6 +89,7 @@ services:
 
   kafka-2:
     image: confluentinc/cp-kafka:7.8.0
+    container_name: kafka-2
     ports:
       - "9093:9093"
     environment:
@@ -101,6 +105,7 @@ services:
 
   kafka-3:
     image: confluentinc/cp-kafka:7.8.0
+    container_name: kafka-3
     ports:
       - "9094:9094"
     environment:

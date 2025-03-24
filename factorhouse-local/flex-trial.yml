@@ -40,6 +40,7 @@ services:
       context: resources/flex
       dockerfile: Dockerfile
     command: taskmanager
+    container_name: taskmanager-1
     networks:
       - factorhouse
     depends_on:
@@ -64,6 +65,7 @@ services:
       context: resources/flex
       dockerfile: Dockerfile
     command: taskmanager
+    container_name: taskmanager-2
     networks:
       - factorhouse
     depends_on:
@@ -88,6 +90,7 @@ services:
       context: resources/flex
       dockerfile: Dockerfile
     command: taskmanager
+    container_name: taskmanager-3
     networks:
       - factorhouse
     depends_on:

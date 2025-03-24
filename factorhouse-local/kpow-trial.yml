@@ -3,6 +3,7 @@ version: "2.1"
 services:
   schema:
     image: confluentinc/cp-schema-registry:7.8.0
+    container_name: schema_registry
     ports:
       - "8081:8081"
     networks:
@@ -83,6 +84,7 @@ services:
 
   kafka-1:
     image: confluentinc/cp-kafka:7.8.0
+    container_name: kafka-1
     ports:
       - "9092:9092"
     networks:
@@ -102,6 +104,7 @@ services:
 
   kafka-2:
     image: confluentinc/cp-kafka:7.8.0
+    container_name: kafka-2
     ports:
       - "9093:9093"
     networks:
@@ -121,6 +124,7 @@ services:
 
   kafka-3:
     image: confluentinc/cp-kafka:7.8.0
+    container_name: kafka-3
     ports:
       - "9094:9094"
     networks:
