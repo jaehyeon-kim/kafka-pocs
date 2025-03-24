@@ -2,6 +2,7 @@ import os
 import datetime
 import inspect
 import dataclasses
+import logging
 from typing import Tuple
 
 import pyflink.version
@@ -104,6 +105,11 @@ if __name__ == "__main__":
         -d
     """
 
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(
+        format="%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:S"
+    )
+
     env = StreamExecutionEnvironment.get_execution_environment()
     env.set_runtime_mode(RuntimeExecutionMode.STREAMING)
     env.configure(set_pipeline_jars_config(RUNTIME_ENV))
@@ -111,6 +117,8 @@ if __name__ == "__main__":
     t_env = StreamTableEnvironment.create(stream_execution_environment=env)
     t_env.get_config().set_local_timezone("Australia/Melbourne")
     t_env.execute_sql(ddl_stmt)
+
+    logger.info("stream environment is set")
 
     source_stream = t_env.to_append_stream(
         t_env.from_path("sensor_source"),
@@ -120,6 +128,8 @@ if __name__ == "__main__":
             Duration.of_seconds(5)
         ).with_timestamp_assigner(SourceTimestampAssigner())
     )
+
+    logger.info("source stream is set")
 
     sensor_sink = (
         KafkaSink.builder()
@@ -146,5 +156,7 @@ if __name__ == "__main__":
     source_stream.map(
         lambda t: Sensor.to_row(t), output_type=Sensor.get_value_type_info()
     ).sink_to(sensor_sink).name("sensor-sink").uid("sensor-sink")
+
+    logger.info("sink to kafka topic - sensor")
 
     env.execute("Basic kafka sink example")
