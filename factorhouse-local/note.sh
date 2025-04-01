@@ -3,7 +3,7 @@ docker-compose -f kpow-trial.yml up -d \
 
 docker-compose -f kpow-trial.yml down --remove-orphans -v
 
-docker-compose -f lakehouse.yml up -d
+EXT_NET=true docker-compose -f lakehouse.yml up -d
 # https://blog.min.io/a-developers-introduction-to-apache-iceberg-using-minio/
 # https://github.com/databricks/docker-spark-iceberg
 

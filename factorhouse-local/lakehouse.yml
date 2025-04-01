@@ -1,4 +1,5 @@
-version: "3"
+version: "2.1"
+
 services:
   spark-iceberg:
     image: tabulario/spark-iceberg
