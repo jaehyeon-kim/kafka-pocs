@@ -1,3 +1,5 @@
+docker-compose -f kpow-community.yml up -d
+
 docker-compose -f kpow-trial.yml up -d \
   && EXT_NET=true docker-compose -f flex-trial.yml up -d
 
